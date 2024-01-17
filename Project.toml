@@ -3,6 +3,9 @@ uuid = "6c38235a-427b-4736-80fa-cf75909744ec"
 authors = ["Eduardo M. G. Vila <72969764+e-duar-do@users.noreply.github.com> and contributors"]
 version = "0.0.0"
 
+[deps]
+MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
+
 [compat]
 julia = "1.6"
 

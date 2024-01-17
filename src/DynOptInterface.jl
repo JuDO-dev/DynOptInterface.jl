@@ -1,5 +1,9 @@
 module DynOptInterface
 
-# Write your package code here.
+import MathOptInterface as MOI
+
+abstract type AbstractDomain end
+
+include("domains.jl")
 
 end
