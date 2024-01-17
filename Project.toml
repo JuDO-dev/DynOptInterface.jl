@@ -1,0 +1,13 @@
+name = "DynOptInterface"
+uuid = "6c38235a-427b-4736-80fa-cf75909744ec"
+authors = ["Eduardo M. G. Vila <72969764+e-duar-do@users.noreply.github.com> and contributors"]
+version = "0.0.0"
+
+[compat]
+julia = "1.6"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
