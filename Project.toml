@@ -7,6 +7,7 @@ version = "0.0.0"
 MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 
 [compat]
+MathOptInterface = "1"
 julia = "1.6"
 
 [extras]
