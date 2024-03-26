@@ -3,6 +3,13 @@ using Documenter
 
 DocMeta.setdocmeta!(DynOptInterface, :DocTestSetup, :(using DynOptInterface); recursive=true)
 
+const _PAGES = [
+    "Home" => "index.md",
+    "API Reference" => [
+        "reference/domains.md",
+    ],
+]
+
 makedocs(;
     modules=[DynOptInterface],
     authors="Eduardo M. G. Vila <72969764+e-duar-do@users.noreply.github.com> and contributors",
@@ -12,9 +19,7 @@ makedocs(;
         edit_link="dev",
         assets=String[],
     ),
-    pages=[
-        "Home" => "index.md",
-    ],
+    pages=_PAGES,
 )
 
 deploydocs(;
