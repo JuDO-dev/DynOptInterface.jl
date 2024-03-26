@@ -17,13 +17,13 @@ end
 
 """
     supports_domain(
-        model::ModelLike,
+        model::MOI.ModelLike,
         ::Type{D},
     ) where {D<:AbstractDomain}
 
 Return a `Bool` indicating whether `model` supports domains of type `D`.
 """
-function supports_domain(::Model, ::Type{<:AbstractDomain})
+function supports_domain(::MOI.ModelLike, ::Type{<:AbstractDomain})
     return false
 end
 
@@ -53,10 +53,13 @@ end
 AddDomainNotAllowed{D}() where {D} = AddDomainNotAllowed{D}("")
 
 """
-    add_domain()
+    add_domain(
+        model::MOI.ModelLike,
+        domain::AbstractDomain
+    )
 
 Add `domain` to the model. An [`UnsupportedDomain`](@ref) error is thrown if 
-`model` does not support 
+`model` does not support. Otherwise a `DomainIndex` is returned.
 """
 function add_domain(model::MOI.ModelLike, domain::AbstractDomain)
     return throw_add_domain_error_fallback(model, domain)
