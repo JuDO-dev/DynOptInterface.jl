@@ -2,6 +2,7 @@ module DynOptInterface
 
 import MathOptInterface as MOI
 
-include("domains.jl")
+include("indices.jl")
+
 
 end

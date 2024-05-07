@@ -2,8 +2,8 @@
 CurrentModule = DynOptInterface
 ```
 
-# Domains
+# Differentiable Variables
 
 ```@docs
-DomainIndex
+DifferentiableIndex
 ```

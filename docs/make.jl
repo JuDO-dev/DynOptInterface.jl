@@ -7,6 +7,8 @@ const _PAGES = [
     "Home" => "index.md",
     "API Reference" => [
         "reference/domains.md",
+        "reference/algebraic.md",
+        "reference/differentiable.md",
     ],
 ]
 
