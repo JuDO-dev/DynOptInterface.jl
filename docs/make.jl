@@ -6,9 +6,11 @@ DocMeta.setdocmeta!(DynOptInterface, :DocTestSetup, :(using DynOptInterface); re
 const _PAGES = [
     "Home" => "index.md",
     "API Reference" => [
-        "reference/domains.md",
-        "reference/algebraic.md",
-        "reference/differentiable.md",
+        "reference/dynamic_variables.md",
+        "reference/algebraic_functions.md",
+        "reference/differential_functions.md",
+        "reference/boundary_functions.md",
+        "reference/integral_functions.md",
     ],
 ]
 

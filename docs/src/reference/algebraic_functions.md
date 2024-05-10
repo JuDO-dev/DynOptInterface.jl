@@ -2,8 +2,8 @@
 CurrentModule = DynOptInterface
 ```
 
-# Algebraic Variables
+# Algebraic Functions
 
 ```@docs
-AlgebraicIndex
+NonlinearAlgebraicFunction
 ```

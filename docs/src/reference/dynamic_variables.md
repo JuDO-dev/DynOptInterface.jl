@@ -2,8 +2,10 @@
 CurrentModule = DynOptInterface
 ```
 
-# Domains
+# Dynamic Variables
 
 ```@docs
 DomainIndex
+AlgebraicVariableIndex
+DifferentialVariableIndex
 ```

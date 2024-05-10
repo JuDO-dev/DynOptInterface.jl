@@ -2,8 +2,9 @@
 CurrentModule = DynOptInterface
 ```
 
-# Differentiable Variables
+# Integral Functions
 
 ```@docs
-DifferentiableIndex
+IntegralFunction
+BolzaFunction
 ```
