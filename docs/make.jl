@@ -1,11 +1,14 @@
 using DynOptInterface
 using Documenter
+using DocumenterInterLinks
 
 DocMeta.setdocmeta!(DynOptInterface, :DocTestSetup, :(using DynOptInterface); recursive=true)
 
 const _PAGES = [
     "Home" => "index.md",
     "API Reference" => [
+        "reference/abstractions.md",
+        "reference/domains.md",
         "reference/dynamic_variables.md",
         "reference/algebraic_functions.md",
         "reference/differential_functions.md",
@@ -13,6 +16,10 @@ const _PAGES = [
         "reference/integral_functions.md",
     ],
 ]
+
+links = InterLinks(
+    "MathOptInterface" => "https://jump.dev/MathOptInterface.jl/stable/objects.inv"
+)
 
 makedocs(;
     modules=[DynOptInterface],
@@ -24,6 +31,7 @@ makedocs(;
         assets=String[],
     ),
     pages=_PAGES,
+    plugins=[links],
 )
 
 deploydocs(;

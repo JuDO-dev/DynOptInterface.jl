@@ -1,91 +1,74 @@
 """
-    AbstractDomain
+    DomainIndex <: AbstractDynamicFunction
 
-Abstract supertype for domains.
-"""
-abstract type AbstractDomain end
-
-"""
-    DomainIndex{D}
-
+```math
+t_i
+```
 A type-safe wrapper for `Int64` for use in referencing domains.
-The parameter `D` is the type of the domain.
 """
-struct DomainIndex{D}
+struct DomainIndex <: AbstractDynamicFunction
     value::Int64
 end
 
 """
-    supports_domain(
-        model::MOI.ModelLike,
-        ::Type{D},
-    ) where {D<:AbstractDomain}
+    supports_domain(model::MOI.ModelLike)
 
-Return a `Bool` indicating whether `model` supports domains of type `D`.
+Return a `Bool` indicating whether `model` supports domains.
 """
-function supports_domain(::MOI.ModelLike, ::Type{<:AbstractDomain})
-    return false
-end
+supports_domain(::MOI.ModelLike) = false
 
 """
-    struct UnsupportedDomain{D<:AbstractDomain} <: MOI.UnsupportedError
-        message::String
-    end
+    UnsupportedDomain <: MOI.UnsupportedError
 
-An error indicating that domains of type `D` are not supported by the model,
-that is, that [`supports_domain`](@ref) returns `false`.
+An error indicating that domains are not supported by the model, that is, 
+that [`supports_domain`](@ref) returns `false`.
 """
-struct UnsupportedDomain{D<:AbstractDomain} <: MOI.UnsupportedError
+struct UnsupportedDomain <: MOI.UnsupportedError
     message::String
 end
 
 """
-    struct AddDomainNotAllowed{D<:AbstractDomain} <: MOI.NotAllowedError
-        message::String
-    end
+    AddDomainNotAllowed <: MOI.NotAllowedError
 
-An error indicating that domains of type `D` are supported but cannot be added 
-to the current state of the model.
+An error indicating that domains cannot be added to the model in its
+current state.
 """
-struct AddDomainNotAllowed{D<:AbstractDomain} <: MOI.NotAllowedError
+struct AddDomainNotAllowed <: MOI.NotAllowedError
     message::String
 end
-AddDomainNotAllowed{D}() where {D} = AddDomainNotAllowed{D}("")
+
+MOI.operation_name(::AddDomainNotAllowed) = "Adding a domain"
 
 """
-    add_domain(
-        model::MOI.ModelLike,
-        domain::AbstractDomain
-    )
+    add_domain(model::MOI.ModelLike)
 
-Add `domain` to the model. An [`UnsupportedDomain`](@ref) error is thrown if 
-`model` does not support. Otherwise a `DomainIndex` is returned.
+Add a domain to the model, returning a [`DomainIndex`](@ref). An
+[`AddDomainNotAllowed`](@ref) is thrown if a domain cannot be added
+to the `model` in its current state.
 """
-function add_domain(model::MOI.ModelLike, domain::AbstractDomain)
-    return throw_add_domain_error_fallback(model, domain)
-end
+add_domain(::MOI.ModelLike) = throw(AddDomainNotAllowed(""))
 
-function throw_add_domain_error_fallback(
-    model::MOI.ModelLike,
-    domain::AbstractDomain;
-    error_if_supported = AddDomainNotAllowed{typeof(domain)}(),
-)
-    if supports_domain(model, typeof(domain))
-        throw(error_if_supported)
-    else
-        throw(UnsupportedConstraint{typeof(domain)}())
-    end
-end
+#=
 
-"""
-    struct Interval{T0, TF} <: AbstractDomain
-        t_0::T0
-        t_f::TF
-    end
 
-A one-dimensional domain where `t_0` and `t_f` may be real numbers or variable indices.  
-"""
-struct Interval{T0, TF} <: AbstractDomain
-    t_0::T0
-    t_f::TF
-end
+# Parameters
+@parameter(model, t_0)
+
+# Design Variables
+@variable(model, 1.0 ≤ t_f ≤ 2.0)
+
+# Time Domains
+@domain(model, t ∈ [0.0, t_f])
+add_domain()::Tuple{DomainIndex, ConstraintIndex, ConstraintIndex}
+# start(t) ∈ EqualTo
+# final(t) ∈ Interval
+
+# Algebraic Variables
+@algebraic(model, u(t))
+add_algebraic()::AlgebraicVariableIndex()
+
+# Differential Variable
+@differential(model, y(t))
+add_differential()::DynamicVariableIndex()
+
+=#

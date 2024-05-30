@@ -1,40 +1,48 @@
 """
-    AbstractDynamicFunction <: MOI.AbstractScalarFunction
+    DynamicVariableIndex <: AbstractDynamicFunction
 
-Abstract supertype for dynamic functions.
+```math
+t_i \\mapsto y_j(t_i)
+```
+A type-safe wrapper for `Int64` for use in referencing dynamic variables.
 """
-abstract type AbstractDynamicFunction <: MOI.AbstractScalarFunction end
-
-"""
-    AbstractAlgebraicFunction <: AbstractDynamicFunction
-
-Abstract supertype for algebraic functions.
-"""
-abstract type AbstractAlgebraicFunction <: AbstractDynamicFunction end
-
-"""
-    DomainIndex <: AbstractDynamicFunction
-
-A type-safe wrapper for `Int64` for use in referencing domains.
-"""
-struct DomainIndex <: AbstractAlgebraicFunction
+struct DynamicVariableIndex <: AbstractAlgebraicFunction
     value::Int64
+    domain::DomainIndex
 end
 
 """
-    AlgebraicVariableIndex <: AbstractDynamicFunction
+    supports_dynamic_variable(model::MOI.ModelLike)
 
-A type-safe wrapper for `Int64` for use in referencing algebraic variables.
+Return a `Bool` indicating whether `model` supports dynamic variables.
 """
-struct AlgebraicVariableIndex <: AbstractAlgebraicFunction
-    value::Int64
+supports_dynamic_variable(::MOI.ModelLike) = false
+
+"""
+    UnsupportedDynamicVariable <: MOI.UnsupportedError
+
+An error indicating that dynamic variables are not supported by the model, that is, 
+that [`supports_dynamic_variable`](@ref) returns `false`.
+"""
+struct UnsupportedDynamicVariable <: MOI.UnsupportedError
+    message::String
 end
 
 """
-    DifferentialVariableIndex <: AbstractDynamicFunction
+    AddDynamicVariableNotAllowed <: MOI.NotAllowedError
 
-A type-safe wrapper for `Int64` for use in referencing differential variables.
+An error indicating that dynamic variables cannot be added to the model
+in its current state.
 """
-struct DifferentialVariableIndex <: AbstractAlgebraicFunction
-    value::Int64
+struct AddDynamicVariableNotAllowed <: MOI.NotAllowedError
+    message::String
 end
+
+MOI.operation_name(::AddDynamicVariableNotAllowed) = "Adding a dynamic variable"
+
+"""
+    add_dynamic_variable(::MOI.ModelLike)
+
+Add
+"""
+add_dynamic_variable(::MOI.ModelLike) = throw(AddDynamicVariableNotAllowed(""))

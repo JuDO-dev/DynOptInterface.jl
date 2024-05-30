@@ -1,13 +1,9 @@
 """
-    AbstractBoundaryFunction <: AbstractDynamicFunction
-
-Abstract supertype for dynamic functions evaluated at the domain boundaries.
-"""
-abstract type AbstractBoundaryFunction <: AbstractDynamicFunction end
-
-"""
     DomainInitial <: AbstractBoundaryFunction
 
+```math
+t_i^0
+```
 Represents the initial point of a [`DomainIndex`](@ref).
 """
 struct DomainInitial <: AbstractBoundaryFunction
@@ -17,6 +13,9 @@ end
 """
     DomainFinal <: AbstractBoundaryFunction
 
+```math
+t_i^f
+```
 Represents the final point of a [`DomainIndex`](@ref).
 """
 struct DomainFinal <: AbstractBoundaryFunction
@@ -24,47 +23,47 @@ struct DomainFinal <: AbstractBoundaryFunction
 end
 
 """
-    DifferentialVariableInitial <: AbstractBoundaryFunction
+    DynamicVariableInitial <: AbstractBoundaryFunction
 
-Represents a [`DifferentialVariableIndex`](@ref) evaluated at the initial point of its [`DomainIndex`](@ref)
+```math
+y_j(t_i^0)
+```    
+Represents a [`DynamicVariableIndex`](@ref) evaluated at the initial point of its [`DomainIndex`](@ref)
 """
-struct DifferentialVariableInitial <: AbstractBoundaryFunction
-    index::DifferentialVariableIndex
+struct DynamicVariableInitial <: AbstractBoundaryFunction
+    variable_index::DynamicVariableIndex
 end
 
 """
-    DifferentialVariableFinal <: AbstractBoundaryFunction
+    DynamicVariableFinal <: AbstractBoundaryFunction
 
-Represents a [`DifferentialVariableIndex`](@ref) evaluated at the final point of its [`DomainIndex`](@ref)
+```math
+y_j(t_i^f)
+```
+Represents a [`DynamicVariableIndex`](@ref) evaluated at the final point of its [`DomainIndex`](@ref)
 """
-struct DifferentialVariableFinal <: AbstractBoundaryFunction
-    index::DifferentialVariableIndex
+struct DynamicVariableFinal <: AbstractBoundaryFunction
+    variable_index::DynamicVariableIndex
 end
 
 """
     NonlinearBoundaryFunction <: AbstractBoundaryFunction
+    
+```math
+b(y_j(t^0), y_j(t^f), t^0, t^f, x)
+```
+Similar to [`MathOptInterface.ScalarNonlinearFunction`](@extref), 
 
-Represents a general 
-Supports:
-* [`DifferentialVariableInitial`](@ref)
-* [`DifferentialVariableFinal`](@ref)
-* [`DomainInitial`](@ref)
-* [`DomainFinal`](@ref)
-* [`NonlinearBoundaryFunction`](@ref)
-* `MOI.ScalarNonlinearFunction`
+Each node in `args` can be one of the following:
+* A constant value of type `T<:Real`
+* A [`MathOptInterface.VariableIndex`](@extref)
+* A [`DomainInitial`](@ref)
+* A [`DomainFinal`](@ref)
+* A [`DynamicVariableInitial`](@ref)
+* A [`DynamicVariableFinal`](@ref)
+* Another [`NonlinearBoundaryFunction`](@ref)
 """
 struct NonlinearBoundaryFunction <: AbstractBoundaryFunction
-    head::Symbol
-    args::Vector{Any}
-    # Inner constructor to enforce rules
-end
-
-"""
-    NonlinearLinkageFunction
-
-Similar to [`NonlinearBoundaryFunction`](@ref) but with different domains allowed.
-"""
-struct NonlinearLinkageFunction <: AbstractDynamicFunction
     head::Symbol
     args::Vector{Any}
     # Inner constructor to enforce rules

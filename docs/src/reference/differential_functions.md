@@ -5,7 +5,7 @@ CurrentModule = DynOptInterface
 # Differential Functions
 
 ```@docs
-DifferentialVariableDerivative
+DynamicVariableDerivative
 ExplicitDifferentialFunction
 NonlinearDifferentialFunction
 ```

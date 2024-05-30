@@ -5,9 +5,9 @@ CurrentModule = DynOptInterface
 # Dynamic Variables
 
 ```@docs
-AbstractDynamicFunction
-AbstractAlgebraicFunction
-DomainIndex
-AlgebraicVariableIndex
-DifferentialVariableIndex
+DynamicVariableIndex
+supports_dynamic_variable
+UnsupportedDynamicVariable
+AddDynamicVariableNotAllowed
+add_dynamic_variable
 ```
