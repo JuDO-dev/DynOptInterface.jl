@@ -7,8 +7,19 @@
 Represents the integral of an [`AbstractAlgebraicFunction`](@ref) over its domain.
 """
 struct IntegralFunction{AF<:AbstractAlgebraicFunction} <: AbstractDynamicFunction
-    domain_index::DomainIndex
     integrand::AF
+    t_i::DomainIndex
+end
+
+function MOI.Utilities._to_string(options::MOI.Utilities._PrintOptions, model::MOI.ModelLike,
+    integral::IntegralFunction,
+)
+    return string(
+        "∫(",
+        MOI.Utilities._to_string(options, model, integral.integrand),
+        ") d",
+        MOI.Utilities._to_string(options, model, integral.t_i),
+    )
 end
 
 """
@@ -26,4 +37,12 @@ struct BolzaFunction{BF<:AbstractBoundaryFunction, AF<:AbstractAlgebraicFunction
     # Inner constructor to check same index
 end
 
-# Multi-Phase solvers may support: Vector{NonlinearBolzaFunction}
+function MOI.Utilities._to_string(options::MOI.Utilities._PrintOptions, model::MOI.ModelLike,
+    bolza::BolzaFunction,
+)
+    return string(
+        MOI.Utilities._to_string(options, model, bolza.boundary),
+        " + ",
+        MOI.Utilities._to_string(options, model, bolza.integrand),
+    )
+end

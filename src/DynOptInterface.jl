@@ -9,7 +9,6 @@ include("algebraic_functions.jl")
 include("differential_functions.jl")
 include("boundary_functions.jl")
 include("integral_functions.jl")
-include("print.jl")
 
 
 end

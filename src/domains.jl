@@ -1,13 +1,19 @@
 """
-    DomainIndex <: AbstractDynamicFunction
+    DomainIndex <: AbstractAlgebraicFunction
 
 ```math
 t_i
 ```
 A type-safe wrapper for `Int64` for use in referencing domains.
 """
-struct DomainIndex <: AbstractDynamicFunction
+struct DomainIndex <: AbstractAlgebraicFunction
     value::Int64
+end
+
+function MOI.Utilities._to_string(::MOI.Utilities._PrintOptions, ::MOI.ModelLike,
+    t_i::DomainIndex
+)
+    return string("t[", t_i.value, "]")
 end
 
 """
@@ -42,33 +48,8 @@ MOI.operation_name(::AddDomainNotAllowed) = "Adding a domain"
 """
     add_domain(model::MOI.ModelLike)
 
-Add a domain to the model, returning a [`DomainIndex`](@ref). An
+Add a domain to `model`, returning a [`DomainIndex`](@ref). An
 [`AddDomainNotAllowed`](@ref) is thrown if a domain cannot be added
 to the `model` in its current state.
 """
 add_domain(::MOI.ModelLike) = throw(AddDomainNotAllowed(""))
-
-#=
-
-
-# Parameters
-@parameter(model, t_0)
-
-# Design Variables
-@variable(model, 1.0 ≤ t_f ≤ 2.0)
-
-# Time Domains
-@domain(model, t ∈ [0.0, t_f])
-add_domain()::Tuple{DomainIndex, ConstraintIndex, ConstraintIndex}
-# start(t) ∈ EqualTo
-# final(t) ∈ Interval
-
-# Algebraic Variables
-@algebraic(model, u(t))
-add_algebraic()::AlgebraicVariableIndex()
-
-# Differential Variable
-@differential(model, y(t))
-add_differential()::DynamicVariableIndex()
-
-=#
