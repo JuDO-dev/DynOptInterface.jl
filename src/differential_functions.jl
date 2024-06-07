@@ -43,7 +43,7 @@ end
     NonlinearDifferentialFunction <: AbstractDifferentialFunction
 
 ```math
-t_i \\mapsto r(\\dot{y}(t_i), y(t_i), t_i, x)
+t_i \\mapsto f_d(\\dot{y}(t_i), y(t_i), t_i, x)
 ```
 Similar to `MOI.ScalarNonlinearFunction`, 
 

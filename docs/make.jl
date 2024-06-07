@@ -1,8 +1,8 @@
-using DynOptInterface
+import DynOptInterface
 using Documenter
 using DocumenterInterLinks
 
-DocMeta.setdocmeta!(DynOptInterface, :DocTestSetup, :(using DynOptInterface); recursive=true)
+DocMeta.setdocmeta!(DynOptInterface, :DocTestSetup, :(import DynOptInterface as DOI); recursive=true)
 
 const _PAGES = [
     "Home" => "index.md",

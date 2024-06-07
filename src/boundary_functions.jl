@@ -61,7 +61,7 @@ const _NONLINEAR_BOUNDARY_TYPES = Union{
     NonlinearBoundaryFunction <: AbstractBoundaryFunction
     
 ```math
-b(y(t^0), y(t^f), t^0, t^f, x)
+f_b(y(t^0), y(t^f), t^0, t^f, x)
 ```
 Similar to [`MathOptInterface.ScalarNonlinearFunction`](@extref), 
 

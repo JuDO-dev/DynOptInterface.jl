@@ -1,8 +1,57 @@
+## Types
+
+"""
+    LinearAlgebraicTerm{T}
+
+```math
+t_i \\mapsto c_j y_j(t_i)
+```
+"""
+struct LinearAlgebraicTerm{T}
+    coefficient::T
+    y_j::DynamicVariableIndex
+end
+
+"""
+    LinearAlgebraicFunction{T} <: AbstractAlgebraicFunction
+
+```math
+t_i \\mapsto c^\\top y(t_i)
+```
+"""
+struct LinearAlgebraicFunction{T} <: AbstractAlgebraicFunction
+    terms::Vector{LinearAlgebraicTerm{T}}
+end
+
+"""
+    SquaredAlgebraicTerm{T}
+
+```math
+t_i \\mapsto y_j(t_i) c_{jk} y_k(t_i)
+```
+"""
+struct SquaredAlgebraicTerm{T}
+    coefficient::T
+    y_j::DynamicVariableIndex
+    y_k::DynamicVariableIndex
+end
+
+"""
+    SquaredAlgebraicFunction{T}
+
+```math
+t_i \\mapsto y(t_i)^\\top C y(t_i)
+```
+"""
+struct SquaredAlgebraicFunction{T}
+    terms::Vector{SquaredAlgebraicTerm{T}}
+end
+
 """
     NonlinearAlgebraicFunction <: AbstractAlgebraicFunction
 
 ```math
-t_i \\mapsto a(y(t_i), t_i, x)
+t_i \\mapsto f_a(y(t_i), t_i, x)
 ```
 Similar to [`MathOptInterface.ScalarNonlinearFunction`](@ref), 
 
