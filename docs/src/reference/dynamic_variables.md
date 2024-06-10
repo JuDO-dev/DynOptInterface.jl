@@ -10,11 +10,11 @@ CurrentModule = DynOptInterface
 DynamicVariableIndex
 ```
 
-## Attributes
+## Errors
+
 ```@docs
-DynamicVariableName
-DynamicVariablePrimalStart
-DynamicVariablePrimal
+UnsupportedDynamicVariable
+AddDynamicVariableNotAllowed
 ```
 
 ## Functions
@@ -24,9 +24,10 @@ supports_dynamic_variable
 add_dynamic_variable
 ```
 
-## Errors
+## Attributes
 
 ```@docs
-UnsupportedDynamicVariable
-AddDynamicVariableNotAllowed
+DynamicVariableName
+DynamicVariablePrimalStart
+DynamicVariablePrimal
 ```

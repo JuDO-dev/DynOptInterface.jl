@@ -63,15 +63,37 @@ const _NONLINEAR_BOUNDARY_TYPES = Union{
 ```math
 f_b(y(t^0), y(t^f), t^0, t^f, x)
 ```
-Similar to [`MathOptInterface.ScalarNonlinearFunction`](@extref), 
+Similar to [`MathOptInterface.ScalarNonlinearFunction`](@ref), an expression
+tree is used to represent nonlinear functions.
 
-Each node in `args` can be one of the following:
+```julia
+struct NonlinearAlgebraicFunction <: AbstractAlgebraicFunction
+    head::Symbol
+    args::Vector{Any}
+...
+end
+```
+
+### `head`
+
+The symbol `head` must be an operator that is supported by the model. The 
+model attribute [`MathOptInterface.ListOfSupportedNonlinearOperators`](@extref)
+provides a list of supported operators. If the optimizer does not support `head`,
+a [`MathOptInterface.UnsupportedNonlinearOperator`](@extref) error is thrown.
+
+### `args`
+
+The vector `args` contains the arguments to the nonlinear operator. Each element in
+`args` can be one of the following:
 * A constant value of type `T<:Real`
-* A [`MathOptInterface.VariableIndex`](@extref)
-* An `Initial{DomainIndex}`
-* A `Final{DomainIndex}`
-* An `Initial{DynamicVariableIndex}`
-* A `Final{DynamicVariableIndex}`
+* A [`MathOptInterface.VariableIndex`](@extref) ``x_k``
+* A [`MathOptInterface.ScalarAffineFunction`](@extref) ``a^\\top x + b``
+* A [`MathOptInterface.ScalarQuadraticFunction`](@extref) ``x^\\top Q x + a^\\top x + b``
+* A [`MathOptInterface.ScalarNonlinearFunction`](@extref) ``f(x)``
+* A [`Initial`](@ref) of [`DomainIndex`](@ref) ``t_i^0``
+* A [`Final`](@ref) of [`DomainIndex`](@ref) ``t_i^f``
+* A [`Initial`](@ref) of [`DynamicVariableIndex`](@ref) ``y(t_i^0)``
+* A [`Final`](@ref) of [`DynamicVariableIndex`](@ref) ``y(t_i^f)``
 * Another [`NonlinearBoundaryFunction`](@ref)
 """
 struct NonlinearBoundaryFunction <: AbstractBoundaryFunction

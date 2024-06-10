@@ -10,13 +10,11 @@ CurrentModule = DynOptInterface
 DomainIndex
 ```
 
-## Attributes
+## Errors
+
 ```@docs
-DomainName
-DomainInitialPrimalStart
-DomainFinalPrimalStart
-DomainInitialPrimal
-DomainFinalPrimal
+UnsupportedDomain
+AddDomainNotAllowed
 ```
 
 ## Functions
@@ -26,8 +24,12 @@ supports_domain
 add_domain
 ```
 
-## Errors
+## Attributes
+
 ```@docs
-UnsupportedDomain
-AddDomainNotAllowed
+DomainName
+DomainInitialPrimalStart
+DomainFinalPrimalStart
+DomainInitialPrimal
+DomainFinalPrimal
 ```

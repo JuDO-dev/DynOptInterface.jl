@@ -45,12 +45,12 @@ Abstract supertype for attributs objects that can be used to set or get attribut
 """
 abstract type AbstractDynamicVariableAttribute end
 
-const AnyDynamicAttribute = Union{
+const DynamicAttribute = Union{
     AbstractDomainAttribute,
     AbstractDynamicVariableAttribute,
 }
 
-function MOI.get(model::MOI.ModelLike, attr::AnyDynamicAttribute, args...)
+function MOI.get(model::MOI.ModelLike, attr::DynamicAttribute, args...)
     return throw(
         MOI.GetAttributeNotAllowed(
             attr,

@@ -1,6 +1,7 @@
 import DynOptInterface
 using Documenter
 using DocumenterInterLinks
+using DocumenterMermaid
 
 DocMeta.setdocmeta!(DynOptInterface, :DocTestSetup, :(import DynOptInterface as DOI); recursive=true)
 

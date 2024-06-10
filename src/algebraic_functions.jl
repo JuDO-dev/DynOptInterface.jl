@@ -53,14 +53,44 @@ end
 ```math
 t_i \\mapsto f_a(y(t_i), t_i, x)
 ```
-Similar to [`MathOptInterface.ScalarNonlinearFunction`](@ref), 
+Similar to [`MathOptInterface.ScalarNonlinearFunction`](@ref), an expression
+tree is used to represent nonlinear functions.
 
-Each node in `args` can be one of the following:
+```julia
+struct NonlinearAlgebraicFunction <: AbstractAlgebraicFunction
+    head::Symbol
+    args::Vector{Any}
+    t_i::DomainIndex
+...
+end
+```
+
+### `head`
+
+The symbol `head` must be an operator that is supported by the model. The 
+model attribute [`MathOptInterface.ListOfSupportedNonlinearOperators`](@extref)
+provides a list of supported operators. If the optimizer does not support `head`,
+a [`MathOptInterface.UnsupportedNonlinearOperator`](@extref) error is thrown.
+
+### `args`
+
+The vector `args` contains the arguments to the nonlinear operator. Each element in
+`args` can be one of the following:
 * A constant value of type `T<:Real`
-* A [`MathOptInterface.VariableIndex`](@extref)
-* A [`DomainIndex`](@ref)
-* A [`DynamicVariableIndex`](@ref)
+* A [`MathOptInterface.VariableIndex`](@extref) ``x_k``
+* A [`MathOptInterface.ScalarAffineFunction`](@extref) ``a^\\top x + b``
+* A [`MathOptInterface.ScalarQuadraticFunction`](@extref) ``x^\\top Q x + a^\\top x + b``
+* A [`MathOptInterface.ScalarNonlinearFunction`](@extref) ``f(x)``
+* A [`DomainIndex`](@ref) ``t_i``
+* A [`DynamicVariableIndex`](@ref) ``y_j(t_i)``
+* A [`LinearAlgebraicFunction`](@ref) ``c^\\top y(t_i)``
+* A [`SquaredAlgebraicFunction`](@ref) ``y(t_i)^\\top C y(t_i)``
 * Another [`NonlinearAlgebraicFunction`](@ref)
+
+### `t_i`
+
+As expressions are composed, dynamic functions must have the same [`DomainIndex`](@ref)
+`t_i`.
 """
 struct NonlinearAlgebraicFunction <: AbstractAlgebraicFunction
     head::Symbol
