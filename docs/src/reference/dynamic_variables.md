@@ -4,10 +4,11 @@ CurrentModule = DynOptInterface
 
 # Dynamic Variables
 
-## Type
+## Types
 
 ```@docs
 DynamicVariableIndex
+DynamicVariableDerivative
 ```
 
 ## Errors
@@ -22,11 +23,15 @@ AddDynamicVariableNotAllowed
 ```@docs
 supports_dynamic_variable
 add_dynamic_variable
+MOI.supports(::MOI.ModelLike, ::AbstractDynamicVariableAttribute, ::Type{DynamicVariableIndex})
+MOI.set(::MOI.ModelLike, ::AbstractDynamicVariableAttribute, ::DynamicVariableIndex, ::Any)
+MOI.get(::MOI.ModelLike, ::AbstractDynamicVariableAttribute, ::DynamicVariableIndex)
 ```
 
 ## Attributes
 
 ```@docs
+AbstractDynamicVariableAttribute
 DynamicVariableName
 DynamicVariablePrimalStart
 DynamicVariablePrimal

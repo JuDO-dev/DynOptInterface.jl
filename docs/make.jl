@@ -8,18 +8,17 @@ DocMeta.setdocmeta!(DynOptInterface, :DocTestSetup, :(import DynOptInterface as 
 const _PAGES = [
     "Home" => "index.md",
     "API Reference" => [
-        "reference/abstractions.md",
-        "reference/domains.md",
+        "reference/phases.md",
         "reference/dynamic_variables.md",
-        "reference/algebraic_functions.md",
-        "reference/differential_functions.md",
+        "reference/dynamic_functions.md",
         "reference/boundary_functions.md",
         "reference/integral_functions.md",
+        "reference/nonlinear_support.md",
     ],
 ]
 
 links = InterLinks(
-    "MathOptInterface" => "https://jump.dev/MathOptInterface.jl/stable/objects.inv"
+    "MathOptInterface" => "https://jump.dev/MathOptInterface.jl/v1.30/objects.inv"
 )
 
 makedocs(;

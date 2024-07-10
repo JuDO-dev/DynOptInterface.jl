@@ -1,15 +1,23 @@
 """
-    Initial{AF<:AbstractAlgebraicFunction} <: AbstractBoundaryFunction
+    AbstractBoundaryFunction <: MOI.AbstractScalarFunction
+
+Abstract supertype for dynamic functions evaluated at phase boundaries. That is,
+expressions that may contain ``t^0``, ``t^f``, ``y(t^0)``, or ``y(t^f)``.
+"""
+abstract type AbstractBoundaryFunction <: MOI.AbstractScalarFunction end
+
+"""
+    Initial{AF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
 
 ```math
-a(y(t_i^0), t_i^0, x)
+b^0(y(t_i^0), t_i^0, x)
 ```
-Represents the evaluation of an [`AbstractAlgebraicFunction`](@ref) at the initial 
-point of its domain. Common cases are:
-* ``t_i^0`` `Initial{DomainIndex}`
+Represents the evaluation of an [`AbstractDynamicFunction`](@ref) at the initial 
+point of its phase. Common cases are:
+* ``t_i^0`` `Initial{PhaseIndex}`
 * ``y_j(t_i^0)`` `Initial{DynamicVariableIndex}`
 """
-struct Initial{AF<:AbstractAlgebraicFunction} <: AbstractBoundaryFunction
+struct Initial{AF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
     evaluand::AF
 end
 
@@ -24,17 +32,17 @@ function MOI.Utilities._to_string(options::MOI.Utilities._PrintOptions, model::M
 end
 
 """
-    Final{AF<:AbstractAlgebraicFunction} <: AbstractBoundaryFunction
+    Final{AF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
 
 ```math
-a(y(t_i^f), t_i^f, x)
+b^f(y(t_i^f), t_i^f, x)
 ```
-Represents the evaluation of an [`AbstractAlgebraicFunction`](@ref) at the final 
-point of its domain. Common cases are:
-* ``t_i^f`` `Final{DomainIndex}`
+Represents the evaluation of an [`AbstractDynamicFunction`](@ref) at the final 
+point of its phase. Common cases are:
+* ``t_i^f`` `Final{PhaseIndex}`
 * ``y_j(t_i^f)`` `Final{DynamicVariableIndex}`
 """
-struct Final{AF<:AbstractAlgebraicFunction} <: AbstractBoundaryFunction
+struct Final{AF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
     evaluand::AF
 end
 
@@ -51,50 +59,49 @@ end
 const _NONLINEAR_BOUNDARY_TYPES = Union{
     Real,
     MOI.VariableIndex,
-    Initial{DomainIndex},
-    Final{DomainIndex},
+    Initial{PhaseIndex},
+    Final{PhaseIndex},
     Initial{DynamicVariableIndex},
     Final{DynamicVariableIndex},
 }
 
 """
-    NonlinearBoundaryFunction <: AbstractBoundaryFunction
-    
+    struct NonlinearBoundaryFunction <: AbstractBoundaryFunction
+        head::Symbol
+        args::Vector{Any}
+    ...
+    end
+
 ```math
 f_b(y(t^0), y(t^f), t^0, t^f, x)
 ```
-Similar to [`MathOptInterface.ScalarNonlinearFunction`](@ref), an expression
-tree is used to represent nonlinear functions.
-
-```julia
-struct NonlinearAlgebraicFunction <: AbstractAlgebraicFunction
-    head::Symbol
-    args::Vector{Any}
-...
-end
-```
+Similar to [`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction), nonlinear dynamic
+functions are represented by an expression tree.
 
 ### `head`
 
 The symbol `head` must be an operator that is supported by the model. The 
-model attribute [`MathOptInterface.ListOfSupportedNonlinearOperators`](@extref)
+model attribute [`MOI.ListOfSupportedNonlinearOperators`](@extref MathOptInterface.ListOfSupportedNonlinearOperators)
 provides a list of supported operators. If the optimizer does not support `head`,
-a [`MathOptInterface.UnsupportedNonlinearOperator`](@extref) error is thrown.
+a [`MOI.UnsupportedNonlinearOperator`](@extref MathOptInterface.UnsupportedNonlinearOperator) error is thrown.
 
 ### `args`
 
-The vector `args` contains the arguments to the nonlinear operator. Each element in
-`args` can be one of the following:
+The vector `args` contains the arguments to the nonlinear operator. The possible
+arguments that may be included are:
 * A constant value of type `T<:Real`
-* A [`MathOptInterface.VariableIndex`](@extref) ``x_k``
-* A [`MathOptInterface.ScalarAffineFunction`](@extref) ``a^\\top x + b``
-* A [`MathOptInterface.ScalarQuadraticFunction`](@extref) ``x^\\top Q x + a^\\top x + b``
-* A [`MathOptInterface.ScalarNonlinearFunction`](@extref) ``f(x)``
-* A [`Initial`](@ref) of [`DomainIndex`](@ref) ``t_i^0``
-* A [`Final`](@ref) of [`DomainIndex`](@ref) ``t_i^f``
+* A [`MOI.VariableIndex`](@extref MathOptInterface.VariableIndex) ``x_k``
+* A [`MOI.ScalarAffineFunction`](@extref MathOptInterface.ScalarAffineFunction) ``a^\\top x + b``
+* A [`MOI.ScalarQuadraticFunction`](@extref MathOptInterface.ScalarQuadraticFunction) ``x^\\top Q x + a^\\top x + b``
+* A [`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction) ``f(x)``
+* A [`Initial`](@ref) of [`PhaseIndex`](@ref) ``t_i^0``
+* A [`Final`](@ref) of [`PhaseIndex`](@ref) ``t_i^f``
 * A [`Initial`](@ref) of [`DynamicVariableIndex`](@ref) ``y(t_i^0)``
 * A [`Final`](@ref) of [`DynamicVariableIndex`](@ref) ``y(t_i^f)``
 * Another [`NonlinearBoundaryFunction`](@ref)
+Additionally, the optimizer must indicate support of argument types through the 
+[`supports_objective_argument`](@ref) and [`supports_constraint_argument`](@ref)
+functions.
 """
 struct NonlinearBoundaryFunction <: AbstractBoundaryFunction
     head::Symbol

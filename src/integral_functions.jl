@@ -1,14 +1,14 @@
 """
-    IntegralFunction{AF<:AbstractAlgebraicFunction} <: AbstractDynamicFunction
+    IntegralFunction{DF<:AbstractDynamicFunction} <: MOI.AbstractScalarFunction
 
 ```math
-\\int_{t_i^o}^{t_i^f} a(y(t_i), t_i, x) \\mathrm{d}t_i
+\\int_{t_i^o}^{t_i^f} d(\\dot{y}(t_i), y(t_i), t_i, x) \\mathrm{d}t_i
 ```
-Represents the integral of an [`AbstractAlgebraicFunction`](@ref) over its domain.
+Represents the integral of an [`AbstractDynamicFunction`](@ref) over its phase.
 """
-struct IntegralFunction{AF<:AbstractAlgebraicFunction} <: AbstractDynamicFunction
-    integrand::AF
-    t_i::DomainIndex
+struct IntegralFunction{DF<:AbstractDynamicFunction} <: MOI.AbstractScalarFunction
+    integrand::DF
+    t_i::PhaseIndex
 end
 
 function MOI.Utilities._to_string(options::MOI.Utilities._PrintOptions, model::MOI.ModelLike,
@@ -23,15 +23,15 @@ function MOI.Utilities._to_string(options::MOI.Utilities._PrintOptions, model::M
 end
 
 """
-    BolzaFunction{BF<:AbstractBoundaryFunction, AF<:AbstractAlgebraicFunction} <: AbstractDynamicFunction
+    BolzaFunction{BF<:AbstractBoundaryFunction, AF<:AbstractDynamicFunction} <: MOI.AbstractScalarFunction
 
 ```math
-b(y_0, y_f, t_0, t_f, x) + \\int_{t_i^o}^{t_i^f} a(y(t_i), t_i, x) \\mathrm{d}t_i
+b(y_0, y_f, t_0, t_f, x) + \\int_{t_i^o}^{t_i^f} d(\\dot{y}(t_i), y(t_i), t_i, x) \\mathrm{d}t_i
 ```
 Represents the sum of an [`AbstractBoundaryFunction`](@ref) with the integral of
-an [`AbstractAlgebraicFunction`](@ref). The functions must have the same [`DomainIndex`](@ref).
+an [`AbstractDynamicFunction`](@ref). The functions must have the same [`PhaseIndex`](@ref).
 """
-struct BolzaFunction{BF<:AbstractBoundaryFunction, AF<:AbstractAlgebraicFunction} <: AbstractDynamicFunction
+struct BolzaFunction{BF<:AbstractBoundaryFunction, AF<:AbstractDynamicFunction} <: MOI.AbstractScalarFunction
     boundary::BF
     integrand::AF
     # Inner constructor to check same index

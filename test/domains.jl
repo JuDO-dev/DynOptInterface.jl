@@ -1,22 +1,22 @@
-@testset "DomainIndex" begin
+@testset "PhaseIndex" begin
     
-    t_1 = DOI.DomainIndex(1)
+    t_1 = DOI.PhaseIndex(1)
     @test isbits(t_1)
 
 end
 
-@testset "supports_domain" begin
+@testset "supports_phase" begin
     
     struct DummyModel <: MOI.ModelLike end
     model = DummyModel()
-    @test DOI.supports_domain(model) == false
+    @test DOI.supports_phase(model) == false
 
 end
 
-@testset "add_domain" begin
+@testset "add_phase" begin
     
     struct DummyModel <: MOI.ModelLike end
     model = DummyModel()
-    @test_throws DOI.AddDomainNotAllowed DOI.add_domain(model)
+    @test_throws DOI.AddPhaseNotAllowed DOI.add_phase(model)
 
 end

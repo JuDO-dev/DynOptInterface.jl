@@ -1,6 +1,6 @@
 @testset "DynamicVariableIndex" begin
     
-    t_1 = DOI.DomainIndex(1)
+    t_1 = DOI.PhaseIndex(1)
     y_1 = DOI.DynamicVariableIndex(1, t_1)
     @test isbits(y_1)
 
