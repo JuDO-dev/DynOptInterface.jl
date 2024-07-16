@@ -6,19 +6,24 @@ using DocumenterMermaid
 DocMeta.setdocmeta!(DynOptInterface, :DocTestSetup, :(import DynOptInterface as DOI); recursive=true)
 
 const _PAGES = [
-    "Home" => "index.md",
+    #"Home" => "index.md",
     "API Reference" => [
-        "reference/phases.md",
-        "reference/dynamic_variables.md",
-        "reference/dynamic_functions.md",
+        "Dynamic Functions" => [
+            "reference/dynamic_functions/abstraction.md",
+            "reference/dynamic_functions/phases.md",
+            "reference/dynamic_functions/dynamic_variables.md",
+            "reference/dynamic_functions/expressions.md",
+            "reference/dynamic_functions/derivatives.md",
+        ],
         "reference/boundary_functions.md",
-        "reference/integral_functions.md",
         "reference/nonlinear_support.md",
+        "reference/attributes.md",
+        "reference/solutions.md",
     ],
 ]
 
 links = InterLinks(
-    "MathOptInterface" => "https://jump.dev/MathOptInterface.jl/v1.30/objects.inv"
+    "MathOptInterface" => "https://jump.dev/MathOptInterface.jl/v1.31/objects.inv"
 )
 
 makedocs(;

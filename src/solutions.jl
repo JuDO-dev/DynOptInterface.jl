@@ -1,37 +1,13 @@
-abstract type AbstractDynamicVariableAttribute end
+"""
+    AbstractDynamicSolution
 
-struct PhasePrimal <: AbstractDynamicVariableAttribute end
+Abstract supertype for dynamic solutions.
+"""
+abstract type AbstractDynamicSolution end
 
-function MOI.get_fallback(
-    model::MOI.ModelLike,
-    attr::PhasePrimal,
-    ::PhaseIndex,
-)
-    return throw(
-        MOI.GetAttributeNotAllowed(
-            attr,
-            "$(typeof(model)) does not support getting the attribute $(attr)"
-        )
-    )
-end
+"""
+    (::AbstractDynamicSolution)(t::Real)
 
-struct DynamicVariablePrimal <: AbstractDynamicVariableAttribute end
-
-function MOI.get_fallback(
-    model::MOI.ModelLike, 
-    attr::DynamicVariablePrimal,
-    ::DynamicVariableIndex,
-    ::Real
-)
-    return throw(
-        MOI.GetAttributeNotAllowed(
-            attr,
-            "$(typeof(model)) does not support getting the attribute $(attr)"))
-end
-
-
-struct DifferentialVariablePrimal <: AbstractDynamicVariableAttribute end
-
-function MOI.get_fallback()
-
-end
+Evaluates a dynamic solution at `t`.
+"""
+(::AbstractDynamicSolution)(::Real) = nothing

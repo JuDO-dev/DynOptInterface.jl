@@ -4,15 +4,9 @@ CurrentModule = DynOptInterface
 
 # Nonlinear Support
 
-## Errors
-```@docs
-UnsupportedObjectiveArgument
-UnsupportedConstraintArgument
-```
-
-## Functions
-
 ```@docs
 supports_objective_argument
+UnsupportedObjectiveArgument
 supports_constraint_argument
+UnsupportedConstraintArgument
 ```

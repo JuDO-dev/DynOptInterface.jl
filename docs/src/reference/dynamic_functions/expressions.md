@@ -2,13 +2,22 @@
 CurrentModule = DynOptInterface
 ```
 
-# Dynamic Functions
+# Expressions
+
+## Linear
 
 ```@docs
 LinearDynamicTerm
 LinearDynamicFunction
+```
+
+## Squared
+```@docs
 SquaredDynamicTerm
 SquaredDynamicFunction
+```
+
+## Nonlinear
+```@docs
 NonlinearDynamicFunction
-ExplicitDifferentialFunction
 ```
