@@ -66,3 +66,19 @@ to `model` in its current state.
 """
 add_dynamic_variable(::MOI.ModelLike, ::PhaseIndex) =
     throw(AddDynamicVariableNotAllowed(""))
+
+"""
+    MOI.is_valid(model::MOI.ModelLike, index::DynamicVariableIndex)::Bool
+
+Return a `Bool` indicating whether `index` refers to a valid object in `model`.
+"""
+MOI.is_valid(model::MOI.ModelLike, index::DynamicVariableIndex)
+
+"""
+    InvalidDynamicVariableIndex(index::DynamicVariableIndex)
+
+An error indicating that the dynamic variable `index` is invalid.
+"""
+struct InvalidDynamicVariableIndex <: Exception
+    index::DynamicVariableIndex
+end

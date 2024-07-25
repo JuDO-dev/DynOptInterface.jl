@@ -62,3 +62,19 @@ in its current state.
 add_phase(::MOI.ModelLike) = throw(AddPhaseNotAllowed(""))
 
 MOI.operation_name(::AddPhaseNotAllowed) = "Adding a phase"
+
+"""
+    MOI.is_valid(model::MOI.ModelLike, index::PhaseIndex)::Bool
+
+Return a `Bool` indicating whether `index` refers to a valid object in `model`.
+"""
+MOI.is_valid(model::MOI.ModelLike, index::PhaseIndex)
+
+"""
+    InvalidPhaseIndex(index::PhaseIndex)
+
+An error indicating that the phase `index` is invalid.
+"""
+struct InvalidPhaseIndex <: Exception
+    index::PhaseIndex
+end
