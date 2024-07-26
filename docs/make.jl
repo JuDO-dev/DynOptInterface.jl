@@ -6,7 +6,7 @@ using DocumenterMermaid
 DocMeta.setdocmeta!(DynOptInterface, :DocTestSetup, :(import DynOptInterface as DOI); recursive=true)
 
 const _PAGES = [
-    #"Home" => "index.md",
+    "Home" => "index.md",
     "API Reference" => [
         "Dynamic Functions" => [
             "reference/dynamic_functions/abstraction.md",
@@ -17,9 +17,9 @@ const _PAGES = [
         ],
         "reference/boundary_functions.md",
         "reference/nonlinear_support.md",
-        "reference/attributes.md",
         "reference/solutions.md",
     ],
+    "Changelog" => "changelog.md",
 ]
 
 links = InterLinks(

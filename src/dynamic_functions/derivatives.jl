@@ -4,7 +4,7 @@
 A wrapper for [`DynamicVariableIndex`](@ref) for use in referencing its derivative in
 a model.
 
-A sub-type of [`AbstractDynamicFunction`](@ref). Represents the derivative of 
+It is a sub-type of [`AbstractDynamicFunction`](@ref). It represents the derivative of 
 `dyn_var` with respect to its phase, that is, ``t_i \\mapsto \\dot{y}_j(t_i)``. 
 """
 struct DynamicVariableDerivative <: AbstractDynamicFunction
@@ -31,7 +31,7 @@ end
 
 An object representing the function ``t_i \\mapsto \\dot{y}(t_i) - f_d(y(t_i), t_i, x)``.
 
-A sub-type of [`AbstractDynamicFunction`](@ref). The derivative (stored in the `derivative`
+It is a sub-type of [`AbstractDynamicFunction`](@ref). The derivative (stored in the `derivative`
 field) and the dynamic function (stored in the `dyn_fun` field) must be defined in the same
 phase, otherwise a [`MixedPhases`](@ref) error is thrown.
 """

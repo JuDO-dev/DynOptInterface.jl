@@ -11,10 +11,10 @@ LinearDynamicTerm
 LinearDynamicFunction
 ```
 
-## Squared
+## Pure Quadratic
 ```@docs
-SquaredDynamicTerm
-SquaredDynamicFunction
+PureQuadraticDynamicTerm
+PureQuadraticDynamicFunction
 ```
 
 ## Nonlinear

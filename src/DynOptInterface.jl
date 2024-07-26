@@ -12,8 +12,6 @@ include("boundary_functions.jl")
 
 include("nonlinear_support.jl")
 
-include("attributes.jl")
-
 include("solutions.jl")
 
 end

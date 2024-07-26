@@ -1,7 +1,7 @@
 """
     AbstractDynamicSolution
 
-Abstract supertype for dynamic solutions.
+Abstract super-type for dynamic solutions.
 """
 abstract type AbstractDynamicSolution end
 

@@ -3,13 +3,13 @@
 """
     AbstractBoundaryFunction
 
-Abstract supertype for dynamic functions evaluated at phase boundaries.
+Abstract super-type for dynamic functions evaluated at phase boundaries.
     
-That is, expressions that may be or contain:
-* ``t^0`` [`Initial`](@ref){[`PhaseIndex`](@ref)}
-* ``t^f`` [`Final`](@ref){[`PhaseIndex`](@ref)}
-* ``y(t^0)`` [`Initial`](@ref){[`DynamicVariableIndex`](@ref)}
-* ``y(t^f)`` [`Final`](@ref){[`DynamicVariableIndex`](@ref)}
+That is, expressions that may contain:
+* ``t_i^0`` [`Initial`](@ref){[`PhaseIndex`](@ref)}
+* ``t_i^f`` [`Final`](@ref){[`PhaseIndex`](@ref)}
+* ``y_j(t^0)`` [`Initial`](@ref){[`DynamicVariableIndex`](@ref)}
+* ``y_j(t^f)`` [`Final`](@ref){[`DynamicVariableIndex`](@ref)}
 """
 abstract type AbstractBoundaryFunction <: MOI.AbstractScalarFunction end
 
@@ -21,7 +21,7 @@ abstract type AbstractBoundaryFunction <: MOI.AbstractScalarFunction end
 Represents the evaluation of an [`AbstractDynamicFunction`](@ref) at the initial 
 point of its phase.
 
-A sub-type of [`AbstractBoundaryFunction`](@ref). The dynamic function is stored
+It is a sub-type of [`AbstractBoundaryFunction`](@ref). The dynamic function is stored
 in the `dyn_fun` field.
 """
 struct Initial{DF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
@@ -46,7 +46,7 @@ end
 Represents the evaluation of an [`AbstractDynamicFunction`](@ref) at the final 
 point of its phase.
 
-A sub-type of [`AbstractBoundaryFunction`](@ref). The dynamic function is stored
+It is a sub-type of [`AbstractBoundaryFunction`](@ref). The dynamic function is stored
 in the `dyn_fun` field.
 """
 struct Final{DF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
@@ -75,7 +75,7 @@ end
 
 Represents the expression ``f_f(y(t^f), t^f) - f_0(y(t^0), t^0)``.
 
-A sub-type of [`AbstractBoundaryFunction`](@ref). The final function is stored in the
+It is a sub-type of [`AbstractBoundaryFunction`](@ref). The final function is stored in the
 `final` field and the initial function is stored in the `initial` field.
 """
 struct Linkage{DF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
@@ -102,10 +102,9 @@ end
 
 Represents a general function ``f_b(y(t^0), y(t^f), t^0, t^f, x)``.
 
-A sub-type of [`AbstractBoundaryFunction`](@ref). Similar to
+It is a sub-type of [`AbstractBoundaryFunction`](@ref). Similar to
 [`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction),
-nonlinear boundary functions are represented by expression trees, using the
-following fields:
+this function is represented by an expression tree, using the following fields:
 
 ### `head`
 
@@ -124,14 +123,15 @@ may be included are:
 * An [`MOI.ScalarAffineFunction`](@extref MathOptInterface.ScalarAffineFunction) ``a^\\top x + b``
 * An [`MOI.ScalarQuadraticFunction`](@extref MathOptInterface.ScalarQuadraticFunction) ``x^\\top Q x + a^\\top x + b``
 * An [`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction) ``f(x)``
-* An [`Initial`](@ref) of [`PhaseIndex`](@ref) ``t_i^0``
-* A [`Final`](@ref) of [`PhaseIndex`](@ref) ``t_i^f``
-* An [`Initial`](@ref) of [`DynamicVariableIndex`](@ref) ``y(t_i^0)``
-* A [`Final`](@ref) of [`DynamicVariableIndex`](@ref) ``y(t_i^f)``
-* Another [`NonlinearBoundaryFunction`](@ref)s
+* An [`Initial`](@ref){[`PhaseIndex`](@ref)} ``t_i^0``
+* A [`Final`](@ref){[`PhaseIndex`](@ref)} ``t_i^f``
+* An [`Initial`](@ref){[`DynamicVariableIndex`](@ref)} ``y_j(t_i^0)``
+* A [`Final`](@ref){[`DynamicVariableIndex`](@ref)} ``y_j(t_i^f)``
+* Another [`NonlinearBoundaryFunction`](@ref)
 Additionally, the optimizer must indicate support of argument types through the 
 [`supports_objective_argument`](@ref) and [`supports_constraint_argument`](@ref)
-functions.
+functions. Otherwise [`UnsupportedObjectiveArgument`](@ref) and
+[`UnsupportedConstraintArgument`](@ref) errors are thrown.
 """
 struct NonlinearBoundaryFunction <: AbstractBoundaryFunction
     head::Symbol
@@ -149,13 +149,11 @@ end
 ## Integrals
 
 """
-    Integral{DF}(
-        dyn_fun::AbstractDynamicFunction,
-    ) where {DF<:AbstractDynamicFunction}
+    Integral{DF}(dyn_fun::AbstractDynamicFunction) where {DF<:AbstractDynamicFunction}
 
 Represents the integral ``\\int_{t_i^o}^{t_i^f} f_d(\\dot{y}(t_i), y(t_i), t_i, x) \\mathrm{d}t_i``.
 
-A sub-type of [`AbstractBoundaryFunction`](@ref). The integrand is stored in the `dyn_fun` field.
+It is a sub-type of [`AbstractBoundaryFunction`](@ref). The integrand is stored in the `dyn_fun` field.
 """
 struct Integral{DF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
     dyn_fun::DF
@@ -189,7 +187,7 @@ f_b(y_0, y_f, t_0, t_f, x) + \\int_{t_i^o}^{t_i^f} f_d(\\dot{y}(t_i), y(t_i), t_
 Represents the sum of an [`AbstractBoundaryFunction`](@ref) with the integral of
 an [`AbstractDynamicFunction`](@ref).
 
-A sub-type of [`AbstractBoundaryFunction`](@ref). The boundary function is stored in the `bou_fun`
+It is a sub-type of [`AbstractBoundaryFunction`](@ref). The boundary function is stored in the `bou_fun`
 field and the integral is stored in the `integral` field.
 """
 struct Bolza{BF<:AbstractBoundaryFunction,DF<:AbstractDynamicFunction} <:

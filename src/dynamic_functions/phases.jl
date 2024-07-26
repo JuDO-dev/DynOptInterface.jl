@@ -3,9 +3,10 @@
 
 A type-safe wrapper for `Int64` for use in referencing phases in a model.
 
-A sub-type of [`AbstractDynamicFunction`](@ref). Represents an independent variable ``t_i``
-in the domain ``[t_i^0, t_i^f]``. The `Int64` index is stored in the `value` field. To allow
-for deletion, indices need not be consecutive.
+It is a sub-type of [`AbstractDynamicFunction`](@ref). It represents an
+independent variable ``t_i`` in a domain ``[t_i^0, t_i^f]``. The `Int64`
+index value is stored in the `value` field. To allow for deletion, indices
+need not be consecutive.
 """
 struct PhaseIndex <: AbstractDynamicFunction
     value::Int64
@@ -14,9 +15,9 @@ end
 function MOI.Utilities._to_string(
     ::MOI.Utilities._PrintOptions,
     ::MOI.ModelLike,
-    phase::PhaseIndex,
+    index::PhaseIndex,
 )
-    return string("t[", phase.value, "]")
+    return string("PhaseIndex(", index.value, ")")
 end
 
 phase_index(t_i::PhaseIndex) = t_i
@@ -33,8 +34,8 @@ supports_phase(::MOI.ModelLike) = false
 
 An error indicating that phases are not supported by the model.
 
-That is, that [`supports_phase`](@ref) returns `false`. The message `String` is stored in the
-`message` field.
+That is, that [`supports_phase`](@ref) returns `false`. The `String` error
+message is stored in the `message` field.
 """
 struct UnsupportedPhase <: MOI.UnsupportedError
     message::String
@@ -43,9 +44,10 @@ end
 """
     AddPhaseNotAllowed(message::String)
 
-An error indicating that phases cannot be added to the model in its current state.
+An error indicating that phases cannot be added to the model in its current
+state.
 
-The message `String` is stored in the `message` field.
+The `String` error message is stored in the `message` field.
 """
 struct AddPhaseNotAllowed <: MOI.NotAllowedError
     message::String
@@ -56,8 +58,8 @@ end
 
 Add a phase to `model`, returning a [`PhaseIndex`](@ref).
 
-An [`AddPhaseNotAllowed`](@ref) error is thrown if a phase cannot be added to the `model`
-in its current state.
+An [`AddPhaseNotAllowed`](@ref) error is thrown if a phase cannot be added
+to the `model` in its current state.
 """
 add_phase(::MOI.ModelLike) = throw(AddPhaseNotAllowed(""))
 
@@ -66,15 +68,105 @@ MOI.operation_name(::AddPhaseNotAllowed) = "Adding a phase"
 """
     MOI.is_valid(model::MOI.ModelLike, index::PhaseIndex)::Bool
 
-Return a `Bool` indicating whether `index` refers to a valid object in `model`.
+Return a `Bool` indicating whether `index` refers to a valid
+[`PhaseIndex`](@ref) in `model`.
 """
-MOI.is_valid(model::MOI.ModelLike, index::PhaseIndex)
+MOI.is_valid(model::MOI.ModelLike, index::PhaseIndex) = false
 
 """
     InvalidPhaseIndex(index::PhaseIndex)
 
-An error indicating that the phase `index` is invalid.
+An error indicating that the phase `index` is not valid.
 """
 struct InvalidPhaseIndex <: Exception
     index::PhaseIndex
+end
+
+## Attributes
+
+"""
+    MOI.supports(
+        model::MOI.ModelLike,
+        attr::MOI.AbstractVariableAttribute,
+        ::Type{PhaseIndex},
+    )::Bool
+
+Return a `Bool` indicating whether `model` supports the attribute `attr` for
+[`PhaseIndex`](@ref)s.
+"""
+function MOI.supports(
+    ::MOI.ModelLike,
+    ::MOI.AbstractVariableAttribute,
+    ::Type{PhaseIndex},
+)
+    return false
+end
+
+"""
+    MOI.set(
+        model::MOI.ModelLike,
+        attr::MOI.AbstractVariableAttribute,
+        index::PhaseIndex,
+        value,
+    )
+
+Assign `value` to the attribute `attr` of phase `index` in model `model`.
+
+An [`MOI.UnsupportedAttribute`](@extref MathOptInterface.UnsupportedAttribute)
+error is thrown if `model` does not support the attribute `attr`, and a
+[`MOI.SetAttributeNotAllowed`](@extref MathOptInterface.SetAttributeNotAllowed)
+error is thrown if it supports the attribute `attr` but it cannot be set.
+"""
+function MOI.set(
+    model::MOI.ModelLike,
+    attr::MOI.AbstractVariableAttribute,
+    index::PhaseIndex,
+    ::Any,
+)
+    return _set_variable_attribute_fallback(model, attr, index)
+end
+
+function _set_variable_attribute_fallback(
+    model::MOI.ModelLike,
+    attr::MOI.AbstractVariableAttribute,
+    index,
+)
+    if MOI.supports(model, attr, typeof(index))
+        throw(MOI.SetAttributeNotAllowed(attr))
+    else
+        throw(MOI.UnsupportedAttribute(attr))
+    end
+    return nothing
+end
+
+"""
+    MOI.get(
+        model::MOI.ModelLike,
+        attr::MOI.AbstractVariableAttribute,
+        index::PhaseIndex,
+    )
+
+Return the value of the attribute `attr` set to phase `index` in model `model`.
+
+If the attribute `attr` is not supported by `model` then an error should be thrown.
+If the attribute is supported but has not been set, `nothing` is returned.
+"""
+function MOI.get(
+    model::MOI.ModelLike,
+    attr::MOI.AbstractVariableAttribute,
+    index::PhaseIndex,
+)
+    return _get_variable_attribute_fallback(model, attr, index)
+end
+
+function _get_variable_attribute_fallback(
+    model::MOI.ModelLike,
+    attr::MOI.AbstractVariableAttribute,
+    index,
+)
+    throw(MOI.GetAttributeNotAllowed(
+        attr,
+        "$(typeof(model)) does not support getting the attribute $(attr) for $(typeof(index)).",
+    ))
+    return nothing
 end

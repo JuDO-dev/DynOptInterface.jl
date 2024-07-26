@@ -1,23 +1,22 @@
-@testset "DynamicVariableIndex" begin
+@testset "Dynamic Variables" begin
     
     t_1 = DOI.PhaseIndex(1)
     y_1 = DOI.DynamicVariableIndex(1, t_1)
-    @test isbits(y_1)
+    @test y_1.value == 1
+    @test DOI.phase_index(y_1) == t_1
 
-end
+    struct DynVarLessModel <: MOI.ModelLike end
+    model = DynVarLessModel()
 
-@testset "supports_dynamic_variable" begin
-    
-    struct DummyModel <: MOI.ModelLike end
-    model = DummyModel()
     @test DOI.supports_dynamic_variable(model) == false
+    @test_throws DOI.AddDynamicVariableNotAllowed DOI.add_dynamic_variable(model, t_1)
+    @test MOI.is_valid(model, y_1) == false
+    @test_throws MOI.UnsupportedAttribute MOI.set(model, MOI.VariableName(), y_1, "State")
 
-end
+    struct DynVarModel <: MOI.ModelLike end
+    MOI.supports(::DynVarModel, ::MOI.VariableName, ::Type{DOI.DynamicVariableIndex}) = true
+    model = DynVarModel()
 
-@testset "add_dynamic_variable" begin
-    
-    struct DummyModel <: MOI.ModelLike end
-    model = DummyModel()
-    @test_throws DOI.AddDynamicVariableNotAllowed DOI.add_dynamic_variable(model)
+    @test_throws MOI.SetAttributeNotAllowed MOI.set(model, MOI.VariableName(), y_1, "State")
 
 end

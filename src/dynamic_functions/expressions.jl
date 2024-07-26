@@ -38,7 +38,7 @@ phase_index(linear_term::LinearDynamicTerm) = phase_index(linear_term.dyn_var)
 Represents the function ``t_i \\mapsto c^\\top y(t_i)``, which is a sum of
 [`LinearDynamicTerm`](@ref)s.
 
-A sub-type of [`AbstractDynamicFunction`](@ref). All dynamic variables must be defined
+It is sub-type of [`AbstractDynamicFunction`](@ref). All dynamic variables must be defined
 on the same phase, otherwise a [`MixedPhases`](@ref) error is thrown. The
 [`LinearDynamicTerm`](@ref)s are stored in the `terms` field.
 """
@@ -69,10 +69,10 @@ function MOI.Utilities._to_string(
     return s
 end
 
-## Squared
+## Pure Quadratic
 
 """
-    SquaredDynamicTerm{T}(
+    PureQuadraticDynamicTerm{T}(
         coefficient::T
         dyn_var_a::DynamicVariableIndex
         dyn_var_b::DynamicVariableIndex
@@ -82,15 +82,14 @@ Represents the term ``c_{ab} y_a y_b``, where ``c_{ab}`` is a coefficient and ``
 are [`DynamicVariableIndex`](@ref)s.
 
 The coefficient is stored in the `coefficient` field. The dynamic variables are stored in
-the `dyn_var_a` and `dyn_var_b` fields and must be defined on the same phase, otherwise
-a [`MixedPhases`](@ref) error is thrown.
+the `dyn_var_a` and `dyn_var_b` fields.
 """
-struct SquaredDynamicTerm{T}
+struct PureQuadraticDynamicTerm{T}
     coefficient::T
     dyn_var_a::DynamicVariableIndex
     dyn_var_b::DynamicVariableIndex
 
-    function SquaredDynamicTerm(
+    function PureQuadraticDynamicTerm(
         coefficient::T,
         dyn_var_a::DynamicVariableIndex,
         dyn_var_b::DynamicVariableIndex,
@@ -105,40 +104,40 @@ end
 function MOI.Utilities._to_string(
     options::MOI.Utilities._PrintOptions,
     model::MOI.ModelLike,
-    squared_term::SquaredDynamicTerm;
+    pure_quadratic_term::PureQuadraticDynamicTerm;
     is_first::Bool,
 )
     dyn_var_a_string =
-        MOI.Utilities._to_string(options, model, squared_term.dyn_var_a)
+        MOI.Utilities._to_string(options, model, pure_quadratic_term.dyn_var_a)
     dyn_var_b_string =
-        MOI.Utilities._to_string(options, model, squared_term.dyn_var_b)
+        MOI.Utilities._to_string(options, model, pure_quadratic_term.dyn_var_b)
     return MOI.Utilities._to_string(
         options,
-        squared_term.coefficient,
+        pure_quadratic_term.coefficient,
         string(dyn_var_a_string, " ", dyn_var_b_string);
         is_first = is_first,
     )
 end
 
-function phase_index(squared_term::SquaredDynamicTerm)
-    return phase_index(squared_term.dyn_var_a)
+function phase_index(pure_quadratic_term::PureQuadraticDynamicTerm)
+    return phase_index(pure_quadratic_term.dyn_var_a)
 end
 
 """
-    SquaredDynamicFunction{T}(terms::Vector{SquaredDynamicTerm{T}}) where {T}
+    PureQuadraticDynamicFunction{T}(terms::Vector{PureQuadraticDynamicTerm{T}}) where {T}
 
 Represents the function ``t_i \\mapsto y(t_i)^\\top C y(t_i)``, which is a sum of
-[`SquaredDynamicTerm`](@ref)s.
+[`PureQuadraticDynamicTerm`](@ref)s.
 
 A sub-type of [`AbstractDynamicFunction`](@ref). All dynamic variables must be defined
 on the same phase, otherwise a [`MixedPhases`](@ref) error is thrown. The
-[`SquaredDynamicTerm`](@ref)s are stored in the `terms` field.
+[`PureQuadraticDynamicTerm`](@ref)s are stored in the `terms` field.
 """
-struct SquaredDynamicFunction{T} <: AbstractDynamicFunction
-    terms::Vector{SquaredDynamicTerm{T}}
+struct PureQuadraticDynamicFunction{T} <: AbstractDynamicFunction
+    terms::Vector{PureQuadraticDynamicTerm{T}}
 
-    function SquaredDynamicFunction(
-        terms::Vector{SquaredDynamicTerm{T}},
+    function PureQuadraticDynamicFunction(
+        terms::Vector{PureQuadraticDynamicTerm{T}},
     ) where {T}
         if !all(term -> phase_index(term) == phase_index(first(terms)), terms)
             throw(MixedPhases(""))
@@ -150,11 +149,11 @@ end
 function MOI.Utilities._to_string(
     options::MOI.Utilities._PrintOptions,
     model::MOI.ModelLike,
-    squared::SquaredDynamicFunction,
+    pure_quadratic::PureQuadraticDynamicFunction,
 )
     s = ""
     is_first = true
-    for term in squared.terms
+    for term in pure_quadratic.terms
         s *= MOI.Utilities._to_string(options, model, term; is_first = is_first)
         is_first = false
     end
@@ -168,11 +167,10 @@ end
 
 Represents a general function ``t_i \\mapsto f_d(\\dot{y}(t_i), y(t_i), t_i, x)``.
 
-A sub-type of [`AbstractDynamicFunction`](@ref). All dynamic variables must be defined
+It is a sub-type of [`AbstractDynamicFunction`](@ref). All dynamic variables must be defined
 on the same phase, otherwise a [`MixedPhases`](@ref) error is thrown. Similar to
 [`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction),
-nonlinear dynamic functions are represented by expression trees, using the following
-fields:
+this function is represented by an expression tree, using the following fields:
 
 ### `head`
 
@@ -193,13 +191,15 @@ arguments that may be included are:
 * An [`MOI.ScalarQuadraticFunction`](@extref MathOptInterface.ScalarQuadraticFunction) ``x^\\top Q x + a^\\top x + b``
 * An [`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction) ``f(x)``
 * A [`PhaseIndex`](@ref) ``t_i``
-* A [`DynamicVariableIndex`](@ref) ``y_j(t_i)``
-* A [`LinearDynamicFunction`](@ref) ``c^\\top y(t_i)``
-* A [`SquaredDynamicFunction`](@ref) ``y(t_i)^\\top C y(t_i)``
-* Another [`NonlinearDynamicFunction`](@ref)s
+* A [`DynamicVariableIndex`](@ref) ``y_j(\\cdot)``
+* A [`DynamicVariableDerivative`](@ref)  ``\\dot{y}_j(\\cdot)``
+* A [`LinearDynamicFunction`](@ref) ``c^\\top y(\\cdot)``
+* A [`PureQuadraticDynamicFunction`](@ref) ``y(\\cdot)^\\top C y(\\cdot)``
+* Another [`NonlinearDynamicFunction`](@ref)
 Additionally, the optimizer must indicate support of argument types through the 
 [`supports_objective_argument`](@ref) and [`supports_constraint_argument`](@ref)
-functions.
+functions. Otherwise [`UnsupportedObjectiveArgument`](@ref) and
+[`UnsupportedConstraintArgument`](@ref) errors are thrown. 
 """
 struct NonlinearDynamicFunction <: AbstractDynamicFunction
     head::Symbol

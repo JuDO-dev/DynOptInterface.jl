@@ -21,7 +21,7 @@ end
 
 An error indicating that [`supports_objective_argument`](@ref) returns `false`.
 
-The message `String` is stored in the `message` field.
+The `String` error message is stored in the `message` field.
 """
 struct UnsupportedObjectiveArgument{F,A} <: MOI.UnsupportedError
     message::String
@@ -52,7 +52,7 @@ end
 
 An error indicating that [`supports_constraint_argument`](@ref) returns `false`.
 
-The message `String` is stored in the `message` field.
+The `String` error message is stored in the `message` field.
 """
 struct UnsupportedConstraintArgument{F,S,A} <: MOI.UnsupportedError
     message::String

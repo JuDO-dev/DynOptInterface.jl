@@ -1,12 +1,12 @@
 """
-    DynamicVariableIndex(value::Int64, phase::PhaseIndex)
+    DynamicVariableIndex(value::Int64, phase::DynamicVariableIndex)
 
 An object for use in referencing dynamic variables in a model.
 
-A sub-type of [`AbstractDynamicFunction`](@ref). Represents a dynamic variable
-``t_i \\mapsto y_j(t_i)`` defined in the domain ``[t_i^0, t_i^f]``. The `Int64`
-index is stored in the `value` field. To allow for deletion, indices need not be
-consecutive.
+It is a sub-type of [`AbstractDynamicFunction`](@ref). It represents a
+dynamic variable ``t_i \\mapsto y_j(t_i)`` defined in the domain
+``[t_i^0, t_i^f]``. The `Int64` index value is stored in the `value` field.
+To allow for deletion, indices need not be consecutive.
 """
 struct DynamicVariableIndex <: AbstractDynamicFunction
     value::Int64
@@ -16,9 +16,9 @@ end
 function MOI.Utilities._to_string(
     ::MOI.Utilities._PrintOptions,
     ::MOI.ModelLike,
-    dyn_var::DynamicVariableIndex,
+    index::DynamicVariableIndex,
 )
-    return string("y[", dyn_var.value, "]")
+    return string("DynamicVariableIndex(", index.value, ")")
 end
 
 phase_index(dyn_var::DynamicVariableIndex) = dyn_var.phase
@@ -48,7 +48,7 @@ end
 An error indicating that dynamic variables cannot be added to the model
 in its current state.
 
-The message `String` is stored in the `message` field.
+The `String` error message is stored in the `message` field.
 """
 struct AddDynamicVariableNotAllowed <: MOI.NotAllowedError
     message::String
@@ -70,15 +70,80 @@ add_dynamic_variable(::MOI.ModelLike, ::PhaseIndex) =
 """
     MOI.is_valid(model::MOI.ModelLike, index::DynamicVariableIndex)::Bool
 
-Return a `Bool` indicating whether `index` refers to a valid object in `model`.
+Return a `Bool` indicating whether `index` refers to a valid [`DynamicVariableIndex`](@ref)
+in `model`.
 """
-MOI.is_valid(model::MOI.ModelLike, index::DynamicVariableIndex)
+MOI.is_valid(model::MOI.ModelLike, index::DynamicVariableIndex) = false
 
 """
     InvalidDynamicVariableIndex(index::DynamicVariableIndex)
 
-An error indicating that the dynamic variable `index` is invalid.
+An error indicating that the dynamic variable `index` is not valid.
 """
 struct InvalidDynamicVariableIndex <: Exception
     index::DynamicVariableIndex
+end
+
+## Attributes
+
+"""
+    MOI.supports(
+        model::MOI.ModelLike,
+        attr::MOI.AbstractVariableAttribute,
+        ::Type{DynamicVariableIndex},
+    )::Bool
+
+Return a `Bool` indicating whether `model` supports the attribute `attr` for
+[`DynamicVariableIndex`](@ref)s.
+"""
+function MOI.supports(
+    ::MOI.ModelLike,
+    ::MOI.AbstractVariableAttribute,
+    ::Type{DynamicVariableIndex},
+)
+    return false
+end
+
+"""
+    MOI.set(
+        model::MOI.ModelLike,
+        attr::MOI.AbstractVariableAttribute,
+        index::DynamicVariableIndex,
+        value,
+    )
+
+Assign `value` to the attribute `attr` of dynamic variable `index` in model `model`.
+
+An [`MOI.UnsupportedAttribute`](@extref MathOptInterface.UnsupportedAttribute)
+error is thrown if `model` does not support the attribute `attr`, and a
+[`MOI.SetAttributeNotAllowed`](@extref MathOptInterface.SetAttributeNotAllowed)
+error is thrown if it supports the attribute `attr` but it cannot be set.
+"""
+function MOI.set(
+    model::MOI.ModelLike,
+    attr::MOI.AbstractVariableAttribute,
+    index::DynamicVariableIndex,
+    ::Any,
+)
+    return _set_variable_attribute_fallback(model, attr, index)
+end
+
+"""
+    MOI.get(
+        model::MOI.ModelLike,
+        attr::MOI.AbstractVariableAttribute,
+        index::DynamicVariableIndex,
+    )
+
+Return the value of the attribute `attr` set to dynamic variable `index` in model `model`.
+
+If the attribute `attr` is not supported by `model` then an error should be thrown.
+If the attribute is supported but has not been set, `nothing` is returned.
+"""
+function MOI.get(
+    model::MOI.ModelLike,
+    attr::MOI.AbstractVariableAttribute,
+    index::DynamicVariableIndex,
+)
+    return _get_variable_attribute_fallback(model, attr, index)
 end
