@@ -7,6 +7,7 @@ DocMeta.setdocmeta!(DynOptInterface, :DocTestSetup, :(import DynOptInterface as 
 
 const _PAGES = [
     "Home" => "index.md",
+    "Dynamic Optimization" => "dynamic_optimization.md",
     "API Reference" => [
         "Dynamic Functions" => [
             "reference/dynamic_functions/abstraction.md",

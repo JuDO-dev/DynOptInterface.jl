@@ -6,16 +6,16 @@ Abstract super-type for dynamic functions.
 That is, expressions that may contain:
 * ``t_i`` -- a [`PhaseIndex`](@ref)
 * ``y_j(\\cdot)`` -- a [`DynamicVariableIndex`](@ref)
-* ``\\dot{y}_j(\\cdot)`` -- a [`DynamicVariableDerivative`](@ref)
-Sub-types of [`AbstractDynamicFunction`](@ref) must not contain different 
-[`PhaseIndex`](@ref)s.
+
+Sub-types of [`AbstractDynamicFunction`](@ref) must be defined on a single 
+[`PhaseIndex`](@ref).
 """
 abstract type AbstractDynamicFunction <: MOI.AbstractScalarFunction end
 
 """
     phase_index(dyn_fun::AbstractDynamicFunction)::PhaseIndex
 
-Returns the [`PhaseIndex`](@ref) ``t_i`` of the dynamic function `dyn_fun`.
+Returns the [`PhaseIndex`](@ref) ``t_i`` of a dynamic function `dyn_fun`.
 """
 function phase_index(::AbstractDynamicFunction)::PhaseIndex end
 

@@ -85,18 +85,25 @@ end
 ## Attributes
 
 """
+    AbstractPhaseAttribute
+
+Abstract super-type for phase attributes.
+"""
+abstract type AbstractPhaseAttribute end
+
+"""
     MOI.supports(
         model::MOI.ModelLike,
-        attr::MOI.AbstractVariableAttribute,
+        attr::AbstractPhaseAttribute,
         ::Type{PhaseIndex},
-    )::Bool
+    )
 
-Return a `Bool` indicating whether `model` supports the attribute `attr` for
-[`PhaseIndex`](@ref)s.
+Return a `Bool` indicating whether `model` supports the phase attribute
+`attr` for [`PhaseIndex`](@ref)s.
 """
 function MOI.supports(
     ::MOI.ModelLike,
-    ::MOI.AbstractVariableAttribute,
+    ::AbstractPhaseAttribute,
     ::Type{PhaseIndex},
 )
     return false
@@ -105,36 +112,27 @@ end
 """
     MOI.set(
         model::MOI.ModelLike,
-        attr::MOI.AbstractVariableAttribute,
+        attr::AbstractPhaseAttribute,
         index::PhaseIndex,
         value,
     )
 
 Assign `value` to the attribute `attr` of phase `index` in model `model`.
-
-An [`MOI.UnsupportedAttribute`](@extref MathOptInterface.UnsupportedAttribute)
-error is thrown if `model` does not support the attribute `attr`, and a
-[`MOI.SetAttributeNotAllowed`](@extref MathOptInterface.SetAttributeNotAllowed)
-error is thrown if it supports the attribute `attr` but it cannot be set.
 """
 function MOI.set(
     model::MOI.ModelLike,
-    attr::MOI.AbstractVariableAttribute,
+    attr::AbstractPhaseAttribute,
     index::PhaseIndex,
     ::Any,
 )
-    return _set_variable_attribute_fallback(model, attr, index)
-end
-
-function _set_variable_attribute_fallback(
-    model::MOI.ModelLike,
-    attr::MOI.AbstractVariableAttribute,
-    index,
-)
     if MOI.supports(model, attr, typeof(index))
-        throw(MOI.SetAttributeNotAllowed(attr))
+        throw(ArgumentError(
+            "$(typeof(model)) does not currently allow setting the attribute $(attr) to $(index)."
+        ))
     else
-        throw(MOI.UnsupportedAttribute(attr))
+        throw(ArgumentError(
+            "$(typeof(model)) does not support setting attribute $(attr) to a PhaseIndex."
+        ))
     end
     return nothing
 end
@@ -142,31 +140,26 @@ end
 """
     MOI.get(
         model::MOI.ModelLike,
-        attr::MOI.AbstractVariableAttribute,
+        attr::AbstractPhaseAttribute,
         index::PhaseIndex,
     )
 
 Return the value of the attribute `attr` set to phase `index` in model `model`.
-
-If the attribute `attr` is not supported by `model` then an error should be thrown.
-If the attribute is supported but has not been set, `nothing` is returned.
 """
 function MOI.get(
     model::MOI.ModelLike,
-    attr::MOI.AbstractVariableAttribute,
+    attr::AbstractPhaseAttribute,
     index::PhaseIndex,
 )
-    return _get_variable_attribute_fallback(model, attr, index)
-end
-
-function _get_variable_attribute_fallback(
-    model::MOI.ModelLike,
-    attr::MOI.AbstractVariableAttribute,
-    index,
-)
-    throw(MOI.GetAttributeNotAllowed(
-        attr,
-        "$(typeof(model)) does not support getting the attribute $(attr) for $(typeof(index)).",
-    ))
+    throw(ArgumentError(
+        "$(typeof(model)) does not support getting the attribute $(attr) for $(typeof(index))."
+        ))
     return nothing
 end
+
+"""
+    PhaseName()
+
+A phase attribute for a `String` identifying a phase.
+"""
+struct PhaseName <: AbstractPhaseAttribute end

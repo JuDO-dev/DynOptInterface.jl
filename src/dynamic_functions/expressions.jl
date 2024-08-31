@@ -192,7 +192,7 @@ arguments that may be included are:
 * An [`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction) ``f(x)``
 * A [`PhaseIndex`](@ref) ``t_i``
 * A [`DynamicVariableIndex`](@ref) ``y_j(\\cdot)``
-* A [`DynamicVariableDerivative`](@ref)  ``\\dot{y}_j(\\cdot)``
+* A [`Derivative`](@ref) ``\\dot{y}_j(\\cdot)``
 * A [`LinearDynamicFunction`](@ref) ``c^\\top y(\\cdot)``
 * A [`PureQuadraticDynamicFunction`](@ref) ``y(\\cdot)^\\top C y(\\cdot)``
 * Another [`NonlinearDynamicFunction`](@ref)

@@ -32,5 +32,6 @@ NonlinearBoundaryFunction
 ## Integrals
 ```@docs
 Integral
+MultiPhaseIntegral
 Bolza
 ```

@@ -125,7 +125,12 @@ function MOI.set(
     index::DynamicVariableIndex,
     ::Any,
 )
-    return _set_variable_attribute_fallback(model, attr, index)
+    if MOI.supports(model, attr, typeof(index))
+        throw(MOI.SetAttributeNotAllowed(attr))
+    else
+        throw(MOI.UnsupportedAttribute(attr))
+    end
+    return nothing
 end
 
 """
@@ -145,5 +150,9 @@ function MOI.get(
     attr::MOI.AbstractVariableAttribute,
     index::DynamicVariableIndex,
 )
-    return _get_variable_attribute_fallback(model, attr, index)
+    throw(MOI.GetAttributeNotAllowed(
+        attr,
+        "$(typeof(model)) does not support getting the attribute $(attr) for $(typeof(index)).",
+    ))
+    return nothing
 end

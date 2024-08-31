@@ -1,33 +1,33 @@
 """
-    DynamicVariableDerivative(dyn_var::DynamicVariableIndex)
+    Derivative{DF}(dyn_fun::DF) where DF<:AbstractDynamicFunction
 
-A wrapper for [`DynamicVariableIndex`](@ref) for use in referencing its derivative in
-a model.
+A wrapper for an [`AbstractDynamicFunction`](@ref) for use in referencing its derivative
+in a model.
 
 It is a sub-type of [`AbstractDynamicFunction`](@ref). It represents the derivative of 
-`dyn_var` with respect to its phase, that is, ``t_i \\mapsto \\dot{y}_j(t_i)``. 
+`dyn_fun` with respect to its phase.
 """
-struct DynamicVariableDerivative <: AbstractDynamicFunction
-    dyn_var::DynamicVariableIndex
+struct Derivative{DF<:AbstractDynamicFunction} <: AbstractDynamicFunction
+    dyn_fun::DF
 end
 
 function MOI.Utilities._to_string(
     ::MOI.Utilities._PrintOptions,
     ::MOI.ModelLike,
-    derivative::DynamicVariableDerivative,
+    derivative::Derivative,
 )
-    return string("ẏ[", derivative.dyn_var.value, "]")
+    return string("Derivative(", derivative.dyn_fun, ")")
 end
 
-function phase_index(derivative::DynamicVariableDerivative)
-    return phase_index(derivative.dyn_var)
+function phase_index(derivative::Derivative)
+    return phase_index(derivative.dyn_fun)
 end
 
 """
-    ExplicitDifferentialFunction{DF}(
-        derivative::DynamicVariableDerivative,
-        dyn_fun::DF,
-    ) where {DF<:AbstractDynamicFunction}
+    ExplicitDifferentialFunction{D,F}(
+        derivative::Derivative{D},
+        dyn_fun::F,
+    ) where {D<:AbstractDynamicFunction,F<:AbstractDynamicFunction}
 
 An object representing the function ``t_i \\mapsto \\dot{y}(t_i) - f_d(y(t_i), t_i, x)``.
 
@@ -35,19 +35,19 @@ It is a sub-type of [`AbstractDynamicFunction`](@ref). The derivative (stored in
 field) and the dynamic function (stored in the `dyn_fun` field) must be defined in the same
 phase, otherwise a [`MixedPhases`](@ref) error is thrown.
 """
-struct ExplicitDifferentialFunction{DF<:AbstractDynamicFunction} <:
+struct ExplicitDifferentialFunction{D<:AbstractDynamicFunction,F<:AbstractDynamicFunction} <:
        AbstractDynamicFunction
-    derivative::DynamicVariableDerivative
-    dyn_fun::DF
+    derivative::Derivative{D}
+    dyn_fun::F
 
     function ExplicitDifferentialFunction(
-        derivative::DynamicVariableDerivative,
-        dyn_fun::DF,
-    ) where {DF<:AbstractDynamicFunction}
+        derivative::Derivative{D},
+        dyn_fun::F,
+    ) where {D<:AbstractDynamicFunction, F<:AbstractDynamicFunction}
         if phase_index(derivative) != phase_index(dyn_fun)
             throw(MixedPhases(""))
         end
-        return new{DF}(derivative, dyn_fun)
+        return new{D,F}(derivative, dyn_fun)
     end
 end
 

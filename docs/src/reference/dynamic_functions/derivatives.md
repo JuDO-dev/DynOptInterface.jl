@@ -5,6 +5,6 @@ CurrentModule = DynOptInterface
 # Derivatives
 
 ```@docs
-DynamicVariableDerivative
+Derivative
 ExplicitDifferentialFunction
 ```
