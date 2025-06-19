@@ -1,7 +1,7 @@
 """
     DynamicVariableIndex(value::Int64, phase::PhaseIndex)
 
-Represent the dynamic variable ``\boldsymbol{y}_j(\cdot)`` in an expression.
+Represent the dynamic variable ``\\boldsymbol{y}_j(\\cdot)`` in an expression.
 
 It is a subtype of [`AbstractDynamicFunction`](@ref).
 To allow for deletion, indices need not be consecutive.
@@ -88,19 +88,19 @@ abstract type AbstractDynamicVariableAttribute end
 """
     MOI.supports(
         model::MOI.ModelLike,
-        attr::MOI.AbstractDynamicVariableAttribute,
+        attr::AbstractDynamicVariableAttribute,
     )::Bool
 
 Indicate whether `model` supports the dynamic variable attribute `attr`.
 """
-function MOI.supports(::MOI.ModelLike, ::MOI.AbstractDynamicVariableAttribute)
+function MOI.supports(::MOI.ModelLike, ::AbstractDynamicVariableAttribute)
     return false
 end
 
 """
     MOI.set(
         model::MOI.ModelLike,
-        attr::MOI.AbstractDynamicVariableAttribute,
+        attr::AbstractDynamicVariableAttribute,
         dyn_var::DynamicVariableIndex,
         value::Any,
     )
@@ -109,7 +109,7 @@ Assign `value` to the attribute `attr` of dynamic variable `dyn_var` in model `m
 """
 function MOI.set(
     model::MOI.ModelLike,
-    attr::MOI.AbstractDynamicVariableAttribute,
+    attr::AbstractDynamicVariableAttribute,
     ::DynamicVariableIndex,
     value::Any,
 )
@@ -128,7 +128,7 @@ end
 """
     MOI.get(
         model::MOI.ModelLike,
-        attr::MOI.AbstractDynamicVariableAttribute,
+        attr::AbstractDynamicVariableAttribute,
         dyn_var::DynamicVariableIndex,
     )
 
@@ -139,7 +139,7 @@ If the attribute is supported but has not been set, `nothing` is returned.
 """
 function MOI.get(
     model::MOI.ModelLike,
-    attr::MOI.AbstractDynamicVariableAttribute,
+    attr::AbstractDynamicVariableAttribute,
     dyn_var::DynamicVariableIndex,
 )
     throw(ArgumentError(
@@ -161,7 +161,7 @@ struct DynamicVariableName <: AbstractDynamicVariableAttribute end
 A dynamic variable attribute for the start value of the dynamic variable at the initial
 phase boundary.
 """
-struct DynamicVariableInitialPrimalStart <: AbstractDynamicVariableAttribute end
+struct DynamicVariableInitialStart <: AbstractDynamicVariableAttribute end
 
 """
     DynamicVariableFinalStart

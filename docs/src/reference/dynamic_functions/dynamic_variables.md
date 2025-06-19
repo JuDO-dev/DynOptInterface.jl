@@ -6,23 +6,27 @@ CurrentModule = DynOptInterface
 
 ```@docs
 DynamicVariableIndex
-supports_dynamic_variable
-UnsupportedDynamicVariable
-AddDynamicVariableNotAllowed
-add_dynamic_variable
-MOI.is_valid(::MOI.ModelLike, ::DynamicVariableIndex)
-InvalidDynamicVariableIndex
 ```
 
-# Attributes
-
-The [`DynamicVariableIndex`](@ref) object is compatible with the following attributes:
-* [`MOI.VariableName`](@extref MathOptInterface.VariableName) with value types `String`
-* [`MOI.VariablePrimal`](@extref MathOptInterface.VariablePrimal) with value types [`AbstractDynamicSolution`](@ref)
-* [`MOI.VariablePrimalStart`](@extref MathOptInterface.VariablePrimalStart) with value types [`AbstractDynamicSolution`](@ref)
+# Dynamic Variables in Models
 
 ```@docs
-MOI.supports(::MOI.ModelLike, ::MOI.AbstractVariableAttribute, ::Type{DynamicVariableIndex})
-MOI.set(::MOI.ModelLike, ::MOI.AbstractVariableAttribute, ::DynamicVariableIndex, ::Any)
-MOI.get(::MOI.ModelLike, ::MOI.AbstractVariableAttribute, ::DynamicVariableIndex)
+supports_dynamic_variables
+UnsupportedDynamicVariablesError
+add_dynamic_variable
+AddDynamicVariableNotAllowedError
+MOI.is_valid(::MOI.ModelLike, ::DynamicVariableIndex)
+InvalidDynamicVariableError
+```
+
+# Dynamic Variable Attributes
+
+```@docs
+AbstractDynamicVariableAttribute
+MOI.supports(::MOI.ModelLike, ::AbstractDynamicVariableAttribute)
+MOI.set(::MOI.ModelLike, ::AbstractDynamicVariableAttribute, ::DynamicVariableIndex, ::Any)
+MOI.get(::MOI.ModelLike, ::AbstractDynamicVariableAttribute, ::DynamicVariableIndex)
+DynamicVariableName
+DynamicVariableInitialStart
+DynamicVariableFinalStart
 ```

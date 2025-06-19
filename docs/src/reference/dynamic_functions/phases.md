@@ -30,4 +30,6 @@ MOI.supports(::MOI.ModelLike, ::AbstractPhaseAttribute)
 MOI.set(::MOI.ModelLike, ::AbstractPhaseAttribute, ::PhaseIndex, ::Any)
 MOI.get(::MOI.ModelLike, ::AbstractPhaseAttribute, ::PhaseIndex)
 PhaseName
+PhaseInitialStart
+PhaseFinalStart
 ```
