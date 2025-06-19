@@ -20,8 +20,8 @@ struct PhaseIndex <: AbstractDynamicFunction
     value::Int64
 end
 
-function Base.show(io::IO, ::MIME"text/plain", index::PhaseIndex)
-    return print(io, "DOI.PhaseIndex($(index.value))")
+function Base.show(io::IO, ::MIME"text/plain", phase::PhaseIndex)
+    return print(io, "DOI.PhaseIndex($(phase.value))")
 end
 
 """
@@ -65,7 +65,7 @@ end
 
 Add a phase to `model`, returning a [`PhaseIndex`](@ref).
 
-An [`AddPhaseNotAllowedError`](@ref) error is thrown if a phase cannot be added
+An [`AddPhaseNotAllowedError`](@ref) is thrown if a phase cannot be added
 to the `model` in its current state.
 """
 add_phase(::MOI.ModelLike) = throw(AddPhaseNotAllowedError(""))
@@ -82,19 +82,19 @@ end
 MOI.operation_name(::AddPhaseNotAllowedError) = "Adding a phase"
 
 """
-    MOI.is_valid(model::MOI.ModelLike, index::PhaseIndex)::Bool
+    MOI.is_valid(model::MOI.ModelLike, phase::PhaseIndex)::Bool
 
-Indicate whether `index` refers to a valid [`PhaseIndex`](@ref) in `model`.
+Indicate whether `phase` refers to a valid [`PhaseIndex`](@ref) in `model`.
 """
-MOI.is_valid(model::MOI.ModelLike, index::PhaseIndex) = false
+MOI.is_valid(::MOI.ModelLike, ::PhaseIndex) = false
 
 """
-    InvalidPhaseError(index::PhaseIndex)
+    InvalidPhaseError(phase::PhaseIndex)
 
-The phase `index` is not valid in the model.
+The phase `phase` is not valid in the model.
 """
 struct InvalidPhaseError <: Exception
-    index::PhaseIndex
+    phase::PhaseIndex
 end
 
 ## Phase Attributes
@@ -122,16 +122,16 @@ end
     MOI.set(
         model::MOI.ModelLike,
         attr::AbstractPhaseAttribute,
-        index::PhaseIndex,
+        phase::PhaseIndex,
         value::Any,
     )
 
-Assign `value` to the attribute `attr` of phase `index` in model `model`.
+Assign `value` to the attribute `attr` of phase `phase` in model `model`.
 """
 function MOI.set(
     model::MOI.ModelLike,
     attr::AbstractPhaseAttribute,
-    index::PhaseIndex,
+    ::PhaseIndex,
     value::Any,
 )
     if MOI.supports(model, attr)
@@ -140,7 +140,7 @@ function MOI.set(
         ))
     else
         throw(ArgumentError(
-            "$(typeof(model)) does not support phase attribute $(attr)."
+            "$(typeof(model)) does not support attribute $(attr)."
         ))
     end
     return nothing
@@ -150,14 +150,17 @@ end
     MOI.get(
         model::MOI.ModelLike,
         attr::AbstractPhaseAttribute,
-        index::PhaseIndex,
+        phase::PhaseIndex,
     )
 
-Return the value of the attribute `attr` set to phase `index` in `model`.
+Return the value of the attribute `attr` set to phase `phase` in `model`.
+
+If the attribute `attr` is not supported by `model` then an error should be thrown.
+If the attribute is supported but has not been set, `nothing` is returned.
 """
-function MOI.get(model::MOI.ModelLike, attr::AbstractPhaseAttribute, index::PhaseIndex)
+function MOI.get(model::MOI.ModelLike, attr::AbstractPhaseAttribute, phase::PhaseIndex)
     throw(ArgumentError(
-        "$(typeof(model)) does not support getting the attribute $(attr) for $(typeof(index))."
+        "$(typeof(model)) does not support getting the attribute $(attr) for $(typeof(phase))."
         ))
     return nothing
 end
@@ -168,3 +171,31 @@ end
 A phase attribute for a `String` identifying a phase.
 """
 struct PhaseName <: AbstractPhaseAttribute end
+
+"""
+    PhaseInitialStart
+
+A phase attribute for the start value of the initial phase boundary.
+"""
+struct PhaseInitialStart <: AbstractPhaseAttribute end
+
+"""
+    PhaseFinalStart
+
+A phase attribute for the start value of the final phase boundary.
+"""
+struct PhaseFinalStart <: AbstractPhaseAttribute end
+#=
+"""
+    PhaseInitialSolution
+
+A phase attribute for the solution of the initial phase boundary.
+"""
+struct PhaseInitialSolution <: AbstractPhaseAttribute end
+
+"""
+    PhaseFinalSolution
+
+A phase attribute for the solution of the final phase boundary.
+"""
+struct PhaseFinalSolution <: AbstractPhaseAttribute end=#
