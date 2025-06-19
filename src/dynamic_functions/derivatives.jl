@@ -33,7 +33,7 @@ An object representing the function ``t_i \\mapsto \\dot{y}(t_i) - f_d(y(t_i), t
 
 It is a sub-type of [`AbstractDynamicFunction`](@ref). The derivative (stored in the `derivative`
 field) and the dynamic function (stored in the `dyn_fun` field) must be defined in the same
-phase, otherwise a [`MixedPhases`](@ref) error is thrown.
+phase, otherwise a [`NonUniquePhaseError`](@ref) error is thrown.
 """
 struct ExplicitDifferentialFunction{D<:AbstractDynamicFunction,F<:AbstractDynamicFunction} <:
        AbstractDynamicFunction
@@ -45,7 +45,7 @@ struct ExplicitDifferentialFunction{D<:AbstractDynamicFunction,F<:AbstractDynami
         dyn_fun::F,
     ) where {D<:AbstractDynamicFunction, F<:AbstractDynamicFunction}
         if phase_index(derivative) != phase_index(dyn_fun)
-            throw(MixedPhases(""))
+            throw(NonUniquePhaseError(""))
         end
         return new{D,F}(derivative, dyn_fun)
     end

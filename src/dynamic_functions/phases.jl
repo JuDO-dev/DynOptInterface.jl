@@ -1,55 +1,62 @@
 """
+    AbstractDynamicFunction
+
+Supertype for scalar-valued dynamic functions.
+
+That is, expressions that contain a phase parameter ``t^{(i)}``.
+Each dynamic function must be defined on one (and only one) phase.
+"""
+abstract type AbstractDynamicFunction <: MOI.AbstractScalarFunction end
+
+"""
     PhaseIndex(value::Int64)
 
-A type-safe wrapper for `Int64` for use in referencing phases in a model.
+Represent the phase parameter ``t^{(i)}`` in an expression.
 
-It is a sub-type of [`AbstractDynamicFunction`](@ref). It represents an
-independent variable ``t_i`` in a domain ``[t_i^0, t_i^f]``. The `Int64`
-index value is stored in the `value` field. To allow for deletion, indices
-need not be consecutive.
+It is a subtype of [`AbstractDynamicFunction`](@ref).
+To allow for deletion, index values need not be consecutive.
 """
 struct PhaseIndex <: AbstractDynamicFunction
     value::Int64
 end
 
-function MOI.Utilities._to_string(
-    ::MOI.Utilities._PrintOptions,
-    ::MOI.ModelLike,
-    index::PhaseIndex,
-)
-    return string("PhaseIndex(", index.value, ")")
+function Base.show(io::IO, ::MIME"text/plain", index::PhaseIndex)
+    return print(io, "DOI.PhaseIndex($(index.value))")
 end
+
+"""
+    phase_index(dyn_fun::AbstractDynamicFunction)::PhaseIndex
+
+Return the [`PhaseIndex`](@ref) ``t^{(i)}`` of a dynamic function `dyn_fun`.
+"""
+function phase_index(::AbstractDynamicFunction)::PhaseIndex end
 
 phase_index(t_i::PhaseIndex) = t_i
 
 """
-    supports_phase(model::MOI.ModelLike)::Bool
+    NonUniquePhaseError(message::String)
 
-Returns a `Bool` indicating whether `model` supports phases.
+A dynamic function was not defined on one (and only one) phase.
 """
-supports_phase(::MOI.ModelLike) = false
-
-"""
-    UnsupportedPhase(message::String)
-
-An error indicating that phases are not supported by the model.
-
-That is, that [`supports_phase`](@ref) returns `false`. The `String` error
-message is stored in the `message` field.
-"""
-struct UnsupportedPhase <: MOI.UnsupportedError
+struct NonUniquePhaseError <: Exception
     message::String
 end
 
-"""
-    AddPhaseNotAllowed(message::String)
+## Phases in Models
 
-An error indicating that phases cannot be added to the model in its current
-state.
-
-The `String` error message is stored in the `message` field.
 """
-struct AddPhaseNotAllowed <: MOI.NotAllowedError
+    supports_phases(model::MOI.ModelLike)::Bool
+
+Indicate whether `model` supports phases.
+"""
+supports_phases(::MOI.ModelLike)::Bool = false
+
+"""
+    UnsupportedPhasesError(message::String)
+
+The model does not support phases, that is, [`supports_phases`](@ref) returns `false`.
+"""
+struct UnsupportedPhasesError <: MOI.UnsupportedError
     message::String
 end
 
@@ -58,36 +65,44 @@ end
 
 Add a phase to `model`, returning a [`PhaseIndex`](@ref).
 
-An [`AddPhaseNotAllowed`](@ref) error is thrown if a phase cannot be added
+An [`AddPhaseNotAllowedError`](@ref) error is thrown if a phase cannot be added
 to the `model` in its current state.
 """
-add_phase(::MOI.ModelLike) = throw(AddPhaseNotAllowed(""))
+add_phase(::MOI.ModelLike) = throw(AddPhaseNotAllowedError(""))
 
-MOI.operation_name(::AddPhaseNotAllowed) = "Adding a phase"
+"""
+    AddPhaseNotAllowedError(message::String)
+
+Phases cannot be added to the model in its current state.
+"""
+struct AddPhaseNotAllowedError <: MOI.NotAllowedError
+    message::String
+end
+
+MOI.operation_name(::AddPhaseNotAllowedError) = "Adding a phase"
 
 """
     MOI.is_valid(model::MOI.ModelLike, index::PhaseIndex)::Bool
 
-Return a `Bool` indicating whether `index` refers to a valid
-[`PhaseIndex`](@ref) in `model`.
+Indicate whether `index` refers to a valid [`PhaseIndex`](@ref) in `model`.
 """
 MOI.is_valid(model::MOI.ModelLike, index::PhaseIndex) = false
 
 """
-    InvalidPhaseIndex(index::PhaseIndex)
+    InvalidPhaseError(index::PhaseIndex)
 
-An error indicating that the phase `index` is not valid.
+The phase `index` is not valid in the model.
 """
-struct InvalidPhaseIndex <: Exception
+struct InvalidPhaseError <: Exception
     index::PhaseIndex
 end
 
-## Attributes
+## Phase Attributes
 
 """
     AbstractPhaseAttribute
 
-Abstract super-type for phase attributes.
+Supertype for phase attributes.
 """
 abstract type AbstractPhaseAttribute end
 
@@ -95,17 +110,11 @@ abstract type AbstractPhaseAttribute end
     MOI.supports(
         model::MOI.ModelLike,
         attr::AbstractPhaseAttribute,
-        ::Type{PhaseIndex},
-    )
+    )::Bool
 
-Return a `Bool` indicating whether `model` supports the phase attribute
-`attr` for [`PhaseIndex`](@ref)s.
+Indicate whether `model` supports the phase attribute `attr`.
 """
-function MOI.supports(
-    ::MOI.ModelLike,
-    ::AbstractPhaseAttribute,
-    ::Type{PhaseIndex},
-)
+function MOI.supports(::MOI.ModelLike, ::AbstractPhaseAttribute)
     return false
 end
 
@@ -114,7 +123,7 @@ end
         model::MOI.ModelLike,
         attr::AbstractPhaseAttribute,
         index::PhaseIndex,
-        value,
+        value::Any,
     )
 
 Assign `value` to the attribute `attr` of phase `index` in model `model`.
@@ -123,15 +132,15 @@ function MOI.set(
     model::MOI.ModelLike,
     attr::AbstractPhaseAttribute,
     index::PhaseIndex,
-    ::Any,
+    value::Any,
 )
-    if MOI.supports(model, attr, typeof(index))
+    if MOI.supports(model, attr)
         throw(ArgumentError(
-            "$(typeof(model)) does not currently allow setting the attribute $(attr) to $(index)."
+            "$(typeof(model)) does not currently allow setting the attribute $(attr) to $(value)."
         ))
     else
         throw(ArgumentError(
-            "$(typeof(model)) does not support setting attribute $(attr) to a PhaseIndex."
+            "$(typeof(model)) does not support phase attribute $(attr)."
         ))
     end
     return nothing
@@ -144,13 +153,9 @@ end
         index::PhaseIndex,
     )
 
-Return the value of the attribute `attr` set to phase `index` in model `model`.
+Return the value of the attribute `attr` set to phase `index` in `model`.
 """
-function MOI.get(
-    model::MOI.ModelLike,
-    attr::AbstractPhaseAttribute,
-    index::PhaseIndex,
-)
+function MOI.get(model::MOI.ModelLike, attr::AbstractPhaseAttribute, index::PhaseIndex)
     throw(ArgumentError(
         "$(typeof(model)) does not support getting the attribute $(attr) for $(typeof(index))."
         ))
@@ -158,7 +163,7 @@ function MOI.get(
 end
 
 """
-    PhaseName()
+    PhaseName
 
 A phase attribute for a `String` identifying a phase.
 """

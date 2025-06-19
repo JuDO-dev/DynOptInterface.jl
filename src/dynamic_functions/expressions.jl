@@ -39,7 +39,7 @@ Represents the function ``t_i \\mapsto c^\\top y(t_i)``, which is a sum of
 [`LinearDynamicTerm`](@ref)s.
 
 It is sub-type of [`AbstractDynamicFunction`](@ref). All dynamic variables must be defined
-on the same phase, otherwise a [`MixedPhases`](@ref) error is thrown. The
+on the same phase, otherwise a [`NonUniquePhaseError`](@ref) error is thrown. The
 [`LinearDynamicTerm`](@ref)s are stored in the `terms` field.
 """
 struct LinearDynamicFunction{T} <: AbstractDynamicFunction
@@ -49,7 +49,7 @@ struct LinearDynamicFunction{T} <: AbstractDynamicFunction
         terms::Vector{LinearDynamicTerm{T}},
     ) where {T}
         if !all(term -> phase_index(term) == phase_index(first(terms)), terms)
-            throw(MixedPhases(""))
+            throw(NonUniquePhaseError(""))
         end
         return new{T}(terms)
     end
@@ -95,7 +95,7 @@ struct PureQuadraticDynamicTerm{T}
         dyn_var_b::DynamicVariableIndex,
     ) where {T}
         if phase_index(dyn_var_a) != phase_index(dyn_var_b)
-            throw(MixedPhases)
+            throw(NonUniquePhaseError)
         end
         return new{T}(coefficient, dyn_var_a, dyn_var_b)
     end
@@ -130,7 +130,7 @@ Represents the function ``t_i \\mapsto y(t_i)^\\top C y(t_i)``, which is a sum o
 [`PureQuadraticDynamicTerm`](@ref)s.
 
 A sub-type of [`AbstractDynamicFunction`](@ref). All dynamic variables must be defined
-on the same phase, otherwise a [`MixedPhases`](@ref) error is thrown. The
+on the same phase, otherwise a [`NonUniquePhaseError`](@ref) error is thrown. The
 [`PureQuadraticDynamicTerm`](@ref)s are stored in the `terms` field.
 """
 struct PureQuadraticDynamicFunction{T} <: AbstractDynamicFunction
@@ -140,7 +140,7 @@ struct PureQuadraticDynamicFunction{T} <: AbstractDynamicFunction
         terms::Vector{PureQuadraticDynamicTerm{T}},
     ) where {T}
         if !all(term -> phase_index(term) == phase_index(first(terms)), terms)
-            throw(MixedPhases(""))
+            throw(NonUniquePhaseError(""))
         end
         return new{T}(terms)
     end
@@ -168,7 +168,7 @@ end
 Represents a general function ``t_i \\mapsto f_d(\\dot{y}(t_i), y(t_i), t_i, x)``.
 
 It is a sub-type of [`AbstractDynamicFunction`](@ref). All dynamic variables must be defined
-on the same phase, otherwise a [`MixedPhases`](@ref) error is thrown. Similar to
+on the same phase, otherwise a [`NonUniquePhaseError`](@ref) error is thrown. Similar to
 [`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction),
 this function is represented by an expression tree, using the following fields:
 

@@ -8,9 +8,12 @@ DocMeta.setdocmeta!(DynOptInterface, :DocTestSetup, :(import DynOptInterface as 
 const _PAGES = [
     "Home" => "index.md",
     "Dynamic Optimization" => "dynamic_optimization.md",
+    "Tutorials" => [
+        "Solving a DOP" => "tutorials/solving_dop.md",
+        "Interfacing with a solver" => "tutorials/interfacing_solver.md",
+    ],
     "API Reference" => [
         "Dynamic Functions" => [
-            "reference/dynamic_functions/abstraction.md",
             "reference/dynamic_functions/phases.md",
             "reference/dynamic_functions/dynamic_variables.md",
             "reference/dynamic_functions/expressions.md",
