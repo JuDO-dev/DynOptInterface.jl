@@ -1,67 +1,60 @@
 """
     Derivative{DF}(dyn_fun::DF) where DF<:AbstractDynamicFunction
 
-A wrapper for an [`AbstractDynamicFunction`](@ref) for use in referencing its derivative
-in a model.
+Represent the derivative of a dynamic function with respect to its phase.
 
-It is a sub-type of [`AbstractDynamicFunction`](@ref). It represents the derivative of 
-`dyn_fun` with respect to its phase.
+It is a subtype of [`AbstractDynamicFunction`](@ref).
 """
 struct Derivative{DF<:AbstractDynamicFunction} <: AbstractDynamicFunction
     dyn_fun::DF
 end
 
-function MOI.Utilities._to_string(
-    ::MOI.Utilities._PrintOptions,
-    ::MOI.ModelLike,
-    derivative::Derivative,
-)
-    return string("Derivative(", derivative.dyn_fun, ")")
+function Base.show(io::IO, ::MIME"text/plain", derivative::Derivative)
+    io_buffer = IOBuffer()
+    show(io_buffer, derivative.dyn_fun)
+    output = String(take!(io_buffer))
+    return print(io, "DOI.Derivative($(output))")
 end
 
-function phase_index(derivative::Derivative)
-    return phase_index(derivative.dyn_fun)
-end
+phase_index(derivative::Derivative) = phase_index(derivative.dyn_fun)
 
 """
-    ExplicitDifferentialFunction{D,F}(
-        derivative::Derivative{D},
-        dyn_fun::F,
-    ) where {D<:AbstractDynamicFunction,F<:AbstractDynamicFunction}
+    ExplicitDifferentialFunction{DF}(
+        dyn_var::DynamicVariableIndex,
+        dyn_fun::DF,
+    ) where DF<:AbstractDynamicFunction
 
-An object representing the function ``t_i \\mapsto \\dot{y}(t_i) - f_d(y(t_i), t_i, x)``.
+Represent the function
+``t^{(i)} \\mapsto \\dot{\\boldsymbol{y}}_j(t^{(i)}) - d(\\boldsymbol{y}_j(t^{(i)}), t^{(i)}, x)``.
 
-It is a sub-type of [`AbstractDynamicFunction`](@ref). The derivative (stored in the `derivative`
-field) and the dynamic function (stored in the `dyn_fun` field) must be defined in the same
-phase, otherwise a [`NonUniquePhaseError`](@ref) error is thrown.
+It is a subtype of [`AbstractDynamicFunction`](@ref).
+Both terms must be defined in the same phase, otherwise a [`NonUniquePhaseError`](@ref) is
+thrown.
 """
-struct ExplicitDifferentialFunction{D<:AbstractDynamicFunction,F<:AbstractDynamicFunction} <:
-       AbstractDynamicFunction
-    derivative::Derivative{D}
-    dyn_fun::F
+struct ExplicitDifferentialFunction{DF<:AbstractDynamicFunction} <: AbstractDynamicFunction
+    dyn_var::DynamicVariableIndex
+    dyn_fun::DF
 
     function ExplicitDifferentialFunction(
-        derivative::Derivative{D},
-        dyn_fun::F,
-    ) where {D<:AbstractDynamicFunction, F<:AbstractDynamicFunction}
-        if phase_index(derivative) != phase_index(dyn_fun)
+        dyn_var::DynamicVariableIndex,
+        dyn_fun::DF,
+    ) where {DF<:AbstractDynamicFunction}
+        if phase_index(dyn_var) != phase_index(dyn_fun)
             throw(NonUniquePhaseError(""))
         end
-        return new{D,F}(derivative, dyn_fun)
+        return new{DF}(dyn_var, dyn_fun)
     end
 end
 
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    edf::ExplicitDifferentialFunction,
-)
-    return string(
-        MOI.Utilities._to_string(options, model, edf.derivative),
-        " - (",
-        MOI.Utilities._to_string(options, model, edf.dyn_fun),
-        ")",
-    )
+function Base.show(io::IO, ::MIME"text/plain", edf::ExplicitDifferentialFunction)
+    io_buffer = IOBuffer()
+    show(io_buffer, Derivative(edf.dyn_var))
+    output = String(take!(io_buffer))
+
+    show(io_buffer, edf.dyn_fun)
+    output *= " - (" * String(take!(io_buffer)) * ")"
+
+    return print(io, output)
 end
 
-phase_index(edf::ExplicitDifferentialFunction) = phase_index(edf.derivative)
+phase_index(edf::ExplicitDifferentialFunction) = phase_index(edf.dyn_var)
