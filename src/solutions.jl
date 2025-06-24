@@ -1,13 +1,15 @@
 """
     AbstractDynamicSolution
 
-Abstract super-type for dynamic solutions.
+Supertype for solutions of dynamic functions.
+
+Concrete subtypes must implement [`(::AbstractDynamicSolution)(t::Real)`](@ref).
 """
 abstract type AbstractDynamicSolution end
 
 """
-    (::AbstractDynamicSolution)(t::Real)
+    (::AbstractDynamicSolution)(τ::Real)
 
-Evaluates a dynamic solution at `t`.
+Evaluates a dynamic solution at `τ`.
 """
 (::AbstractDynamicSolution)(::Real) = nothing
