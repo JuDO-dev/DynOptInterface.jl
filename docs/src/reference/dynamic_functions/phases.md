@@ -11,7 +11,7 @@ phase_index
 NonUniquePhaseError
 ```
 
-# Phases in Models
+## Phases in Models
 
 ```@docs
 supports_phases
@@ -22,7 +22,7 @@ MOI.is_valid(::MOI.ModelLike, ::PhaseIndex)
 InvalidPhaseError
 ```
 
-# Phase Attributes
+## Phase Attributes
 
 ```@docs
 AbstractPhaseAttribute
@@ -32,4 +32,6 @@ MOI.get(::MOI.ModelLike, ::AbstractPhaseAttribute, ::PhaseIndex)
 PhaseName
 PhaseInitialStart
 PhaseFinalStart
+PhaseInitialSolution
+PhaseFinalSolution
 ```

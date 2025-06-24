@@ -3,98 +3,80 @@
 """
     AbstractBoundaryFunction
 
-Abstract super-type for dynamic functions evaluated at phase boundaries.
+Supertype for dynamic functions evaluated at initial and/or final phase boundaries.
     
-That is, expressions that may contain:
-* ``t_i^0`` [`Initial`](@ref){[`PhaseIndex`](@ref)}
-* ``t_i^f`` [`Final`](@ref){[`PhaseIndex`](@ref)}
-* ``y_j(t^0)`` [`Initial`](@ref){[`DynamicVariableIndex`](@ref)}
-* ``y_j(t^f)`` [`Final`](@ref){[`DynamicVariableIndex`](@ref)}
+That is, expressions that contain ``t_0`` and/or ``t_f``, respectively.
 """
 abstract type AbstractBoundaryFunction <: MOI.AbstractScalarFunction end
 
 ## Initial & Final
 
 """
-    Initial{DF}(evaluand::DF) where {DF<:AbstractDynamicFunction}
+    Initial{DF}(dyn_fun::DF) where {DF<:AbstractDynamicFunction}
 
-Represents the evaluation of an [`AbstractDynamicFunction`](@ref) at the initial 
-point of its phase.
+Represent the evaluation of an [`AbstractDynamicFunction`](@ref) at the initial boundary of
+its phase.
 
-It is a sub-type of [`AbstractBoundaryFunction`](@ref). The dynamic function is stored
-in the `evaluand` field.
+It is a subtype of [`AbstractBoundaryFunction`](@ref).
 """
 struct Initial{DF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
-    evaluand::DF
+    dyn_fun::DF
 end
 
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    initial::Initial,
-)
-    return string(
-        "Initial(",
-        MOI.Utilities._to_string(options, model, initial.evaluand),
-        ")",
-    )
+function Base.show(io::IO, mime::MIME"text/plain", initial::Initial)
+
+    output = "DOI.Initial("
+    io_buffer = IOBuffer()
+    show(io_buffer, mime, initial.dyn_fun)
+    output *= String(take!(io_buffer)) * ")"
+    return print(io, output)
 end
 
 """
-    Final{DF}(evaluand::DF) where {DF<:AbstractDynamicFunction}
+    Final{DF}(dyn_fun::DF) where {DF<:AbstractDynamicFunction}
 
-Represents the evaluation of an [`AbstractDynamicFunction`](@ref) at the final 
-point of its phase.
+Represent the evaluation of an [`AbstractDynamicFunction`](@ref) at the final boundary of 
+its phase.
 
-It is a sub-type of [`AbstractBoundaryFunction`](@ref). The dynamic function is stored
-in the `evaluand` field.
+It is a subtype of [`AbstractBoundaryFunction`](@ref).
 """
 struct Final{DF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
-    evaluand::DF
+    dyn_fun::DF
 end
 
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    final::Final,
-)
-    return string(
-        "Final(",
-        MOI.Utilities._to_string(options, model, final.evaluand),
-        ")",
-    )
+function Base.show(io::IO, mime::MIME"text/plain", final::Final)
+
+    output = "DOI.Final("
+    io_buffer = IOBuffer()
+    show(io_buffer, mime, final.dyn_fun)
+    output *= String(take!(io_buffer)) * ")"
+    return print(io, output)
 end
 
 ## Linkage
 
 """
-    Linkage{DF}(
-        final_evaluand::DF,
-        initial_evaluand::DF,
-    ) where {DF<:AbstractDynamicFunction}
+    Linkage{DF}(dyn_fun_final::DF, dyn_fun_initial::DF) where {DF<:AbstractDynamicFunction}
 
-Represents the expression ``f_f(y(t^f), t^f) - f_0(y(t^0), t^0)``.
+Represent the expression
+``b_f(\\boldsymbol{y}(t_f), t_f) - b_0(\\boldsymbol{y}(t_0), t_0)``.
 
-It is a sub-type of [`AbstractBoundaryFunction`](@ref). The final function is stored in the
-`final_evaluand` field and the initial function is stored in the `initial_evaluand` field.
+It is a subtype of [`AbstractBoundaryFunction`](@ref).
 """
 struct Linkage{DF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
-    final_evaluand::DF
-    initial_evaluand::DF
+    dyn_fun_final::DF
+    dyn_fun_initial::DF
 end
 
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    linkage::Linkage,
-)
-    return string(
-        "Final(",
-        MOI.Utilities._to_string(options, model, linkage.final_evaluand),
-        ") - Initial(",
-        MOI.Utilities._to_string(options, model, linkage.initial),
-        ")",
-    )
+function Base.show(io::IO, mime::MIME"text/plain", linkage::Linkage)
+
+    output = "(DOI.Final("
+    io_buffer = IOBuffer()
+    show(io_buffer, mime, linkage.dyn_fun_final)
+    output *= String(take!(io_buffer)) * ") - DOI.Initial("
+    show(io_buffer, mime, linkage.dyn_fun_initial)
+    output *= String(take!(io_buffer)) * "))"
+    return print(io, output)
 end
 
 ## Nonlinear
@@ -102,121 +84,89 @@ end
 """
     NonlinearBoundaryFunction(head::Symbol, args::Vector{Any})
 
-Represents a general function ``f_b(y(t^0), y(t^f), t^0, t^f, x)``.
+Represents a general boundary function
+``b(\\boldsymbol{y}(t_0), \\boldsymbol{y}(t_f), t_0, t_f, x)``.
 
-It is a sub-type of [`AbstractBoundaryFunction`](@ref). Similar to
-[`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction),
-this function is represented by an expression tree, using the following fields:
+It is a subtype of [`AbstractBoundaryFunction`](@ref).
+
+Similar to
+[`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction), this
+function is represented by an expression tree, using the following fields:
 
 ### `head`
 
 The symbol `head` must be an operator that is supported by the model. The model attribute
 [`MOI.ListOfSupportedNonlinearOperators`](@extref MathOptInterface.ListOfSupportedNonlinearOperators)
-provides a list of supported operators. If the optimizer does not support `head`,
-an [`MOI.UnsupportedNonlinearOperator`](@extref MathOptInterface.UnsupportedNonlinearOperator)
+provides a list of supported operators. If the optimizer does not support `head`, an
+[`MOI.UnsupportedNonlinearOperator`](@extref MathOptInterface.UnsupportedNonlinearOperator)
 error is thrown.
 
 ### `args`
 
-The vector `args` contains the arguments to the nonlinear operator. The possible arguments that
-may be included are:
-* A constant value of type `T<:Real`
-* An [`MOI.VariableIndex`](@extref MathOptInterface.VariableIndex) ``x_k``
-* An [`MOI.ScalarAffineFunction`](@extref MathOptInterface.ScalarAffineFunction) ``a^\\top x + b``
-* An [`MOI.ScalarQuadraticFunction`](@extref MathOptInterface.ScalarQuadraticFunction) ``x^\\top Q x + a^\\top x + b``
-* An [`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction) ``f(x)``
-* An [`Initial`](@ref){[`PhaseIndex`](@ref)} ``t_i^0``
-* A [`Final`](@ref){[`PhaseIndex`](@ref)} ``t_i^f``
-* An [`Initial`](@ref){[`DynamicVariableIndex`](@ref)} ``y_j(t_i^0)``
-* A [`Final`](@ref){[`DynamicVariableIndex`](@ref)} ``y_j(t_i^f)``
-* Another [`NonlinearBoundaryFunction`](@ref)
+The vector `args` contains the arguments to the nonlinear operator. The arguments must be
+subtypes of:
+* `Real`
+* [`MOI.AbstractScalarFunction`](@extref MathOptInterface.AbstractScalarFunction)
+* [`AbstractBoundaryFunction`](@ref)`, including other [`NonlinearBoundaryFunction`](@ref)s
+
 Additionally, the optimizer must indicate support of argument types through the 
-[`supports_objective_argument`](@ref) and [`supports_constraint_argument`](@ref)
-functions. Otherwise [`UnsupportedObjectiveArgument`](@ref) and
-[`UnsupportedConstraintArgument`](@ref) errors are thrown.
+[`supports_objective_argument`](@ref) and [`supports_constraint_argument`](@ref) functions.
+Otherwise [`UnsupportedObjectiveArgument`](@ref) and [`UnsupportedConstraintArgument`](@ref)
+errors are thrown.
 """
 struct NonlinearBoundaryFunction <: AbstractBoundaryFunction
     head::Symbol
     args::Vector{Any}
 end
 
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    nbf::NonlinearBoundaryFunction,
-)
-    return _nonlinear_to_string(options, model, nbf)
-end
-
 ## Integrals
 
 """
-    Integral{DF}(integrand::DF) where {DF<:AbstractDynamicFunction}
+    Integral{DF}(dyn_fun::DF) where {DF<:AbstractDynamicFunction}
 
-Represents the integral ``\\int_{t_i^o}^{t_i^f} f_d(\\dot{y}(t_i), y(t_i), t_i, x) \\mathrm{d}t_i``.
+Represent the expression
+``\\int_{t_0^{(i)}}^{t_f^{(i)}} d(\\dot{\\boldsymbol{y}}(t^{(i)}), \\boldsymbol{y}(t^{(i)}), t^{(i)}, x) \\mathrm{d}t^{(i)}``.
 
-It is a sub-type of [`AbstractBoundaryFunction`](@ref). The integrand is stored in the `integrand` field.
+It is a sub-type of [`AbstractBoundaryFunction`](@ref).
 """
 struct Integral{DF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
-    integrand::DF
+    dyn_fun::DF
 end
 
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    integral::Integral,
-)
-    return string(
-        "∫(",
-        MOI.Utilities._to_string(options, model, integral.integrand),
-        ")d(",
-        MOI.Utilities._to_string(options, model, phase_index(integral)),
-        ")",
-    )
-end
+function Base.show(io::IO, mime::MIME"text/plain", integral::Integral)
 
-phase_index(integral::Integral) = phase_index(integral.integrand)
+    output = "∫("
+    io_buffer = IOBuffer()
+    show(io_buffer, mime, integral.dyn_fun)
+    output *= String(take!(io_buffer)) * ")"
+    return print(io, output)
+end
 
 """
-    MultiPhaseIntegral{DF}(
-        integrands::Vector{DF},
-    ) where {DF<:AbstractDynamicFunction}
+    MultiPhaseIntegral{DF}(terms::Vector{Integral{DF}}) where {DF<:AbstractDynamicFunction}
 
-Represents the sum of integrals
-``\\sum_i \\big[ \\int_{t_i^o}^{t_i^f} f_d(\\dot{y}(t_i), y(t_i), t_i, x) \\mathrm{d}t_i \\big]``.
+Represent the sum of integrals
+``\\sum_i \\big[ \\int_{t_0^{(i)}}^{t_f^{(i)}} d(\\dot{\\boldsymbol{y}}(t^{(i)}), \\boldsymbol{y}(t^{(i)}), t^{(i)}, x) \\mathrm{d}t^{(i)} \\big]``.
 
-It is a sub-type of [`AbstractBoundaryFunction`](@ref). The vector of integrands is
-stored in the `integrands` field.
+It is a subtype of [`AbstractBoundaryFunction`](@ref).
 """
 struct MultiPhaseIntegral{DF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
-    integrands::Vector{DF}
-end 
+    terms::Vector{Integral{DF}}
+end
 
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    multi_phase_integral::MultiPhaseIntegral,
-)
-    integrands = multi_phase_integral.integrands
+function Base.show(io::IO, mime::MIME"text/plain", multi_phase_integral::MultiPhaseIntegral)
 
-    s = string(
-        "∫(",
-        MOI.Utilities._to_string(options, model, integrands[1]),
-        ")d(",
-        MOI.Utilities._to_string(options, model, phase_index(integrands[1])),
-        ")",
-    )
-
-    for i in 2:length(integrands)
-        s *= string(
-            " + ∫(",
-            MOI.Utilities._to_string(options, model, integrands[i]),
-            ")d(",
-            MOI.Utilities._to_string(options, model, phase_index(integrands[i])),
-            ")",
-        )
+    output = "("
+    io_buffer = IOBuffer()
+    show(io_buffer, mime, multi_phase_integral.terms[1])
+    output *= String(take!(io_buffer))
+    for term in multi_phase_integral.terms[2:end]
+        output *= " + "
+        show(io_buffer, mime, term)
+        output *= String(take!(io_buffer))
     end
-    return s
+    output *= ")"
+    return print(io, output)
 end
 
 """
@@ -225,28 +175,24 @@ end
         integral::IF,
     ) where {BF<:AbstractBoundaryFunction,IF<:Union{Integral,MultiPhaseIntegral}}
 
-```math
-f_b(y_0, y_f, t_0, t_f, x) + \\int_{t_i^o}^{t_i^f} f_d(\\dot{y}(t_i), y(t_i), t_i, x) \\mathrm{d}t_i
-```
-Represents the sum of an [`AbstractBoundaryFunction`](@ref) with either an [`Integral`](@ref) or a
-[`MultiPhaseIntegral`](@ref).
+Represent
+`` b(\\boldsymbol{y}(t_0), \\boldsymbol{y}(t_f), t_0, t_f, x) + \\sum_i \\big[ \\int_{t_0^{(i)}}^{t_f^{(i)}} d(\\dot{\\boldsymbol{y}}(t^{(i)}), \\boldsymbol{y}(t^{(i)}), t^{(i)}, x) \\mathrm{d}t^{(i)} \\big]``
 
-It is a sub-type of [`AbstractBoundaryFunction`](@ref). The boundary function is stored in the `bou_fun`
-field and the integral is stored in the `integral` field.
+That is, the sum of an [`AbstractBoundaryFunction`](@ref) with either an [`Integral`](@ref) or a
+[`MultiPhaseIntegral`](@ref). It is a subtype of [`AbstractBoundaryFunction`](@ref).
 """
 struct Bolza{BF<:AbstractBoundaryFunction,IF<:Union{Integral,MultiPhaseIntegral}} <: AbstractBoundaryFunction
     bou_fun::BF
     integral::IF
 end
 
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    bolza::Bolza,
-)
-    return string(
-        MOI.Utilities._to_string(options, model, bolza.bou_fun),
-        " + ",
-        MOI.Utilities._to_string(options, model, bolza.integral),
-    )
+function Base.show(io::IO, mime::MIME"text/plain", bolza::Bolza)
+
+    output = "("
+    io_buffer = IOBuffer()
+    show(io_buffer, mime, bolza.bou_fun)
+    output *= String(take!(io_buffer)) * " + "
+    show(io_buffer, mime, bolza.integral)
+    output *= String(take!(io_buffer)) * ")"
+    return print(io, output)
 end

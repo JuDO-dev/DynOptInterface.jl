@@ -9,9 +9,9 @@ struct Derivative{DF<:AbstractDynamicFunction} <: AbstractDynamicFunction
     dyn_fun::DF
 end
 
-function Base.show(io::IO, ::MIME"text/plain", derivative::Derivative)
+function Base.show(io::IO, mime::MIME"text/plain", derivative::Derivative)
     io_buffer = IOBuffer()
-    show(io_buffer, derivative.dyn_fun)
+    show(io_buffer, mime, derivative.dyn_fun)
     output = String(take!(io_buffer))
     return print(io, "DOI.Derivative($(output))")
 end
@@ -24,8 +24,8 @@ phase_index(derivative::Derivative) = phase_index(derivative.dyn_fun)
         dyn_fun::DF,
     ) where DF<:AbstractDynamicFunction
 
-Represent the function
-``t^{(i)} \\mapsto \\dot{\\boldsymbol{y}}_j(t^{(i)}) - d(\\boldsymbol{y}_j(t^{(i)}), t^{(i)}, x)``.
+Represent the expression
+``\\dot{\\boldsymbol{y}}_j(t^{(i)}) - d(\\boldsymbol{y}_j(t^{(i)}), t^{(i)}, x)``.
 
 It is a subtype of [`AbstractDynamicFunction`](@ref).
 Both terms must be defined in the same phase, otherwise a [`NonUniquePhaseError`](@ref) is
@@ -46,12 +46,12 @@ struct ExplicitDifferentialFunction{DF<:AbstractDynamicFunction} <: AbstractDyna
     end
 end
 
-function Base.show(io::IO, ::MIME"text/plain", edf::ExplicitDifferentialFunction)
+function Base.show(io::IO, mime::MIME"text/plain", edf::ExplicitDifferentialFunction)
     io_buffer = IOBuffer()
-    show(io_buffer, Derivative(edf.dyn_var))
+    show(io_buffer, mime, Derivative(edf.dyn_var))
     output = String(take!(io_buffer))
 
-    show(io_buffer, edf.dyn_fun)
+    show(io_buffer, mime, edf.dyn_fun)
     output *= " - (" * String(take!(io_buffer)) * ")"
 
     return print(io, output)

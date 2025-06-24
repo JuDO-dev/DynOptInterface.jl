@@ -1,3 +1,25 @@
+function Base.show(
+    io::IO,
+    mime::MIME"text/plain", 
+    nl_fun::Union{NonlinearDynamicFunction,NonlinearBoundaryFunction},
+)
+    output = String(nl_fun.head) * "("
+    
+    io_buffer = IOBuffer()
+    show(io_buffer, mime, nl_fun.args[1])
+    output *= String(take!(io_buffer))
+
+    for arg in nl_fun.args[2:end]
+        output *= ", "
+        io_buffer = IOBuffer()
+        show(io_buffer, mime, arg)
+        output *= String(take!(io_buffer))
+    end
+    
+    output *= ")"
+    return print(io, output)
+end
+
 """
     supports_objective_argument(
         model::MOI.ModelLike,
@@ -5,8 +27,8 @@
         A::Type{<:MOI.AbstractScalarFunction},
     )::Bool
 
-Return a `Bool` indicating whether `model` supports objective functions of type `F`
-containing one or more arguments of type `A`.
+Indicate whether `model` supports objective functions of type `F` containing one or more
+arguments of type `A`.
 """
 function supports_objective_argument(
     ::MOI.ModelLike,
@@ -35,8 +57,8 @@ end
         A::Type{<:MOI.AbstractScalarFunction},
     )::Bool
 
-Return a `Bool` indicating whether `model` supports `F`-in-`S` constraints, where
-the function contains one or more arguments of type `A`.
+Indicate whether `model` supports `F`-in-`S` constraints, where the function contains one or
+more arguments of type `A`.
 """
 function supports_constraint_argument(
     ::MOI.ModelLike,

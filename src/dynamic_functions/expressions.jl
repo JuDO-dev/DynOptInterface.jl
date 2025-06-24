@@ -3,44 +3,23 @@
 """
     LinearDynamicTerm{T}(coefficient::T, dyn_var::DynamicVariableIndex) where {T}
 
-Represents the term ``c_j y_j``, where ``c_j`` is a coefficient and ``y_j`` is a
-[`DynamicVariableIndex`](@ref).
-
-The coefficient is stored in the `coefficient` field and the [`DynamicVariableIndex`](@ref)
-is stored in the `dyn_var` field.
+Represent the term ``c_j \\boldsymbol{y}_j(\\cdot)``, where ``c_j`` is a coefficient of type
+`T`.
 """
 struct LinearDynamicTerm{T}
     coefficient::T
     dyn_var::DynamicVariableIndex
 end
 
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    linear_term::LinearDynamicTerm;
-    is_first::Bool,
-)
-    dyn_var_string =
-        MOI.Utilities._to_string(options, model, linear_term.dyn_var)
-    return MOI.Utilities._to_string(
-        options,
-        linear_term.coefficient,
-        dyn_var_string;
-        is_first = is_first,
-    )
-end
-
-phase_index(linear_term::LinearDynamicTerm) = phase_index(linear_term.dyn_var)
-
 """
     LinearDynamicFunction{T}(terms::Vector{LinearDynamicTerm{T}}) where {T}
 
-Represents the function ``t_i \\mapsto c^\\top y(t_i)``, which is a sum of
+Represent the expression ``c^\\top \\boldsymbol{y}(\\cdot)``, that is, a sum of
 [`LinearDynamicTerm`](@ref)s.
 
-It is sub-type of [`AbstractDynamicFunction`](@ref). All dynamic variables must be defined
-on the same phase, otherwise a [`NonUniquePhaseError`](@ref) error is thrown. The
-[`LinearDynamicTerm`](@ref)s are stored in the `terms` field.
+It is a subtype of [`AbstractDynamicFunction`](@ref).
+All dynamic variables must be defined on the same phase, otherwise a
+[`NonUniquePhaseError`](@ref) error is thrown.
 """
 struct LinearDynamicFunction{T} <: AbstractDynamicFunction
     terms::Vector{LinearDynamicTerm{T}}
@@ -48,25 +27,31 @@ struct LinearDynamicFunction{T} <: AbstractDynamicFunction
     function LinearDynamicFunction(
         terms::Vector{LinearDynamicTerm{T}},
     ) where {T}
-        if !all(term -> phase_index(term) == phase_index(first(terms)), terms)
+        if !all(term -> phase_index(term.dyn_var) == phase_index(terms[1].dyn_var), terms)
             throw(NonUniquePhaseError(""))
         end
         return new{T}(terms)
     end
 end
 
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    linear::LinearDynamicFunction,
-)
-    s = ""
-    is_first = true
-    for term in linear.terms
-        s *= MOI.Utilities._to_string(options, model, term; is_first = is_first)
-        is_first = false
+function Base.show(io::IO, mime::MIME"text/plain", linear_dyn_fun::LinearDynamicFunction)
+    
+    output = String(linear_dyn_fun.terms[1].coefficient) * " "
+    io_buffer = IOBuffer()
+    show(io_buffer, mime, linear_dyn_fun.terms[1].dyn_var)
+    output *= String(take!(io_buffer))
+
+    for term in linear_dyn_fun.terms[2:end]
+        output *= " + " * String(term.coefficient) * " "
+        show(io_buffer, mime, term.dyn_var)
+        output *= String(take!(io_buffer))
     end
-    return s
+
+    return print(io, output)
+end
+
+function phase_index(linear_dyn_fun::LinearDynamicFunction) 
+    return phase_index(linear_dyn_fun.terms[1].dyn_var)
 end
 
 ## Pure Quadratic
@@ -74,64 +59,39 @@ end
 """
     PureQuadraticDynamicTerm{T}(
         coefficient::T
-        dyn_var_a::DynamicVariableIndex
-        dyn_var_b::DynamicVariableIndex
+        dyn_var_1::DynamicVariableIndex
+        dyn_var_2::DynamicVariableIndex
     ) where {T}
 
-Represents the term ``c_{ab} y_a y_b``, where ``c_{ab}`` is a coefficient and ``y_a, y_b``
-are [`DynamicVariableIndex`](@ref)s.
-
-The coefficient is stored in the `coefficient` field. The dynamic variables are stored in
-the `dyn_var_a` and `dyn_var_b` fields.
+Represent the term ``c_{jk} \\boldsymbol{y}_j(\\cdot) \\boldsymbol{y}_k(\\cdot)``, where
+``c_{jk}`` is a coefficient of type `T`.
 """
 struct PureQuadraticDynamicTerm{T}
     coefficient::T
-    dyn_var_a::DynamicVariableIndex
-    dyn_var_b::DynamicVariableIndex
+    dyn_var_1::DynamicVariableIndex
+    dyn_var_2::DynamicVariableIndex
 
     function PureQuadraticDynamicTerm(
         coefficient::T,
-        dyn_var_a::DynamicVariableIndex,
-        dyn_var_b::DynamicVariableIndex,
+        dyn_var_1::DynamicVariableIndex,
+        dyn_var_2::DynamicVariableIndex,
     ) where {T}
-        if phase_index(dyn_var_a) != phase_index(dyn_var_b)
-            throw(NonUniquePhaseError)
+        if phase_index(dyn_var_1) != phase_index(dyn_var_2)
+            throw(NonUniquePhaseError(""))
         end
-        return new{T}(coefficient, dyn_var_a, dyn_var_b)
+        return new{T}(coefficient, dyn_var_1, dyn_var_2)
     end
-end
-
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    pure_quadratic_term::PureQuadraticDynamicTerm;
-    is_first::Bool,
-)
-    dyn_var_a_string =
-        MOI.Utilities._to_string(options, model, pure_quadratic_term.dyn_var_a)
-    dyn_var_b_string =
-        MOI.Utilities._to_string(options, model, pure_quadratic_term.dyn_var_b)
-    return MOI.Utilities._to_string(
-        options,
-        pure_quadratic_term.coefficient,
-        string(dyn_var_a_string, " ", dyn_var_b_string);
-        is_first = is_first,
-    )
-end
-
-function phase_index(pure_quadratic_term::PureQuadraticDynamicTerm)
-    return phase_index(pure_quadratic_term.dyn_var_a)
 end
 
 """
     PureQuadraticDynamicFunction{T}(terms::Vector{PureQuadraticDynamicTerm{T}}) where {T}
 
-Represents the function ``t_i \\mapsto y(t_i)^\\top C y(t_i)``, which is a sum of
-[`PureQuadraticDynamicTerm`](@ref)s.
+Represent the expression ``\\boldsymbol{y}(\\cdot)^\\top C \\boldsymbol{y}(\\cdot)``, that
+is, a sum of [`PureQuadraticDynamicTerm`](@ref)s.
 
-A sub-type of [`AbstractDynamicFunction`](@ref). All dynamic variables must be defined
-on the same phase, otherwise a [`NonUniquePhaseError`](@ref) error is thrown. The
-[`PureQuadraticDynamicTerm`](@ref)s are stored in the `terms` field.
+It is a subtype of [`AbstractDynamicFunction`](@ref).
+All dynamic variables must be defined on the same phase, otherwise a
+[`NonUniquePhaseError`](@ref) error is thrown.
 """
 struct PureQuadraticDynamicFunction{T} <: AbstractDynamicFunction
     terms::Vector{PureQuadraticDynamicTerm{T}}
@@ -139,25 +99,31 @@ struct PureQuadraticDynamicFunction{T} <: AbstractDynamicFunction
     function PureQuadraticDynamicFunction(
         terms::Vector{PureQuadraticDynamicTerm{T}},
     ) where {T}
-        if !all(term -> phase_index(term) == phase_index(first(terms)), terms)
+        if !all(term -> phase_index(term.dyn_var_1) == phase_index(terms[1].dyn_var_1), terms)
             throw(NonUniquePhaseError(""))
         end
         return new{T}(terms)
     end
 end
 
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    pure_quadratic::PureQuadraticDynamicFunction,
-)
-    s = ""
-    is_first = true
-    for term in pure_quadratic.terms
-        s *= MOI.Utilities._to_string(options, model, term; is_first = is_first)
-        is_first = false
+function Base.show(io::IO, mime::MIME"text/plain", quad_dyn_fun::PureQuadraticDynamicFunction)
+
+    output = String(quad_dyn_fun.terms[1].coefficient) * " "
+    io_buffer = IOBuffer()
+    show(io_buffer, mime, quad_dyn_fun.terms[1].dyn_var_1)
+    output *= String(take!(io_buffer)) * " "
+    show(io_buffer, mime, quad_dyn_fun.terms[1].dyn_var_2)
+    output *= String(take!(io_buffer))
+
+    for term in quad_dyn_fun.terms[2:end]
+        output *= " + " * String(term.coefficient) * " "
+        show(io_buffer, mime, term.dyn_var_1)
+        output *= String(take!(io_buffer)) * " "
+        show(io_buffer, mime, term.dyn_var_2)
+        output *= String(take!(io_buffer))
     end
-    return s
+
+    return print(io, output)
 end
 
 ## Nonlinear
@@ -165,10 +131,14 @@ end
 """
     NonlinearDynamicFunction(head::Symbol, args::Vector{Any}, phase::PhaseIndex)
 
-Represents a general function ``t_i \\mapsto f_d(\\dot{y}(t_i), y(t_i), t_i, x)``.
+Represent a general dynamic function
+``d(\\dot{\\boldsymbol{y}}(t^{(i)}), \\boldsymbol{y}(t^{(i)}), t^{(i)}, x)``.
 
-It is a sub-type of [`AbstractDynamicFunction`](@ref). All dynamic variables must be defined
-on the same phase, otherwise a [`NonUniquePhaseError`](@ref) error is thrown. Similar to
+It is a subtype of [`AbstractDynamicFunction`](@ref).
+All dynamic variables must be defined on the same phase, otherwise a
+[`NonUniquePhaseError`](@ref) error is thrown. 
+
+Similar to
 [`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction),
 this function is represented by an expression tree, using the following fields:
 
@@ -183,19 +153,12 @@ error is thrown.
 
 ### `args`
 
-The vector `args` contains the arguments to the nonlinear operator. The possible
-arguments that may be included are:
-* A constant value of type `T<:Real`
-* An [`MOI.VariableIndex`](@extref MathOptInterface.VariableIndex) ``x_k``
-* An [`MOI.ScalarAffineFunction`](@extref MathOptInterface.ScalarAffineFunction) ``a^\\top x + b``
-* An [`MOI.ScalarQuadraticFunction`](@extref MathOptInterface.ScalarQuadraticFunction) ``x^\\top Q x + a^\\top x + b``
-* An [`MOI.ScalarNonlinearFunction`](@extref MathOptInterface.ScalarNonlinearFunction) ``f(x)``
-* A [`PhaseIndex`](@ref) ``t_i``
-* A [`DynamicVariableIndex`](@ref) ``y_j(\\cdot)``
-* A [`Derivative`](@ref) ``\\dot{y}_j(\\cdot)``
-* A [`LinearDynamicFunction`](@ref) ``c^\\top y(\\cdot)``
-* A [`PureQuadraticDynamicFunction`](@ref) ``y(\\cdot)^\\top C y(\\cdot)``
-* Another [`NonlinearDynamicFunction`](@ref)
+The vector `args` contains the arguments to the nonlinear operator. The arguments must be
+subtypes of:
+* `Real`
+* [`MOI.AbstractScalarFunction`](@extref MathOptInterface.AbstractScalarFunction)
+* [`AbstractDynamicFunction`](@ref), including other [`NonlinearDynamicFunction`](@ref)s
+
 Additionally, the optimizer must indicate support of argument types through the 
 [`supports_objective_argument`](@ref) and [`supports_constraint_argument`](@ref)
 functions. Otherwise [`UnsupportedObjectiveArgument`](@ref) and
@@ -205,42 +168,6 @@ struct NonlinearDynamicFunction <: AbstractDynamicFunction
     head::Symbol
     args::Vector{Any}
     phase::PhaseIndex
-end
-
-function _nonlinear_to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    nlf::NLF,
-) where {NLF}
-    io, stack, is_open = IOBuffer(), Any[nlf], true
-    while !isempty(stack)
-        arg = pop!(stack)
-        if !is_open && arg != ')'
-            print(io, ", ")
-        end
-        if arg isa NLF
-            print(io, arg.head, "(")
-            push!(stack, ')')
-            for i in length(arg.args):-1:1
-                push!(stack, arg.args[i])
-            end
-        elseif arg isa Char
-            print(io, arg)
-        else
-            print(io, MOI.Utilities._to_string(options, model, arg))
-        end
-        is_open = arg isa NLF
-    end
-    seekstart(io)
-    return read(io, String)
-end
-
-function MOI.Utilities._to_string(
-    options::MOI.Utilities._PrintOptions,
-    model::MOI.ModelLike,
-    f_d::NonlinearDynamicFunction,
-)
-    return _nonlinear_to_string(options, model, f_d)
 end
 
 phase_index(ndf::NonlinearDynamicFunction) = ndf.phase

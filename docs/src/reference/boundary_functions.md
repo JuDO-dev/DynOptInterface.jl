@@ -4,8 +4,6 @@ CurrentModule = DynOptInterface
 
 # Boundary Functions
 
-## Abstraction
-
 ```@docs
 AbstractBoundaryFunction
 ```

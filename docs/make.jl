@@ -22,6 +22,7 @@ const _PAGES = [
         "reference/boundary_functions.md",
         "reference/nonlinear_support.md",
         "reference/solutions.md",
+        "reference/bridges.md",
     ],
     "Changelog" => "changelog.md",
 ]

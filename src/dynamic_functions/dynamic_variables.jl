@@ -156,17 +156,19 @@ A dynamic variable attribute for a `String` identifying a dynamic variable.
 struct DynamicVariableName <: AbstractDynamicVariableAttribute end
 
 """
-    DynamicVariableInitialStart
+    DynamicVariableStart
 
-A dynamic variable attribute for the start value of the dynamic variable at the initial
-phase boundary.
+A dynamic variable attribute for the start of the dynamic variable.
+
+The start object must be a subtype of [`AbstractDynamicSolution`](@ref).
 """
-struct DynamicVariableInitialStart <: AbstractDynamicVariableAttribute end
+struct DynamicVariableStart <: AbstractDynamicVariableAttribute end
 
 """
-    DynamicVariableFinalStart
+    DynamicVariableSolution
 
-A dynamic variable attribute for the start value of the dynamic variable at the final phase
-boundary.
+A dynamic variable attribute for the solution of the dynamic variable.
+
+The solution object must be a subtype of [`AbstractDynamicSolution`](@ref).
 """
-struct DynamicVariableFinalStart <: AbstractDynamicVariableAttribute end
+struct DynamicVariableSolution <: AbstractDynamicVariableAttribute end

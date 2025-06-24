@@ -8,7 +8,7 @@ CurrentModule = DynOptInterface
 DynamicVariableIndex
 ```
 
-# Dynamic Variables in Models
+## Dynamic Variables in Models
 
 ```@docs
 supports_dynamic_variables
@@ -19,7 +19,7 @@ MOI.is_valid(::MOI.ModelLike, ::DynamicVariableIndex)
 InvalidDynamicVariableError
 ```
 
-# Dynamic Variable Attributes
+## Dynamic Variable Attributes
 
 ```@docs
 AbstractDynamicVariableAttribute
@@ -27,6 +27,6 @@ MOI.supports(::MOI.ModelLike, ::AbstractDynamicVariableAttribute)
 MOI.set(::MOI.ModelLike, ::AbstractDynamicVariableAttribute, ::DynamicVariableIndex, ::Any)
 MOI.get(::MOI.ModelLike, ::AbstractDynamicVariableAttribute, ::DynamicVariableIndex)
 DynamicVariableName
-DynamicVariableInitialStart
-DynamicVariableFinalStart
+DynamicVariableStart
+DynamicVariableSolution
 ```

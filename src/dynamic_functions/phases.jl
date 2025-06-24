@@ -1,7 +1,7 @@
 """
     AbstractDynamicFunction
 
-Supertype for scalar-valued dynamic functions.
+Supertype for (scalar-valued) dynamic functions.
 
 That is, expressions that contain a phase parameter ``t^{(i)}``.
 Each dynamic function must be defined on one (and only one) phase.
@@ -185,7 +185,7 @@ struct PhaseInitialStart <: AbstractPhaseAttribute end
 A phase attribute for the start value of the final phase boundary.
 """
 struct PhaseFinalStart <: AbstractPhaseAttribute end
-#=
+
 """
     PhaseInitialSolution
 
@@ -198,4 +198,4 @@ struct PhaseInitialSolution <: AbstractPhaseAttribute end
 
 A phase attribute for the solution of the final phase boundary.
 """
-struct PhaseFinalSolution <: AbstractPhaseAttribute end=#
+struct PhaseFinalSolution <: AbstractPhaseAttribute end
