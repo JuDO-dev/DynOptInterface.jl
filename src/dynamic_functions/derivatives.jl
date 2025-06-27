@@ -25,7 +25,7 @@ phase_index(derivative::Derivative) = phase_index(derivative.dyn_fun)
     ) where DF<:AbstractDynamicFunction
 
 Represent the expression
-``\\dot{\\boldsymbol{y}}_j(t^{(i)}) - d(\\boldsymbol{y}_j(t^{(i)}), t^{(i)}, x)``.
+``\\dot{\\boldsymbol{y}}_j(t^{(i)}) - d(\\boldsymbol{y}(t^{(i)}), t^{(i)}, x)``.
 
 It is a subtype of [`AbstractDynamicFunction`](@ref).
 Both terms must be defined in the same phase, otherwise a [`NonUniquePhaseError`](@ref) is

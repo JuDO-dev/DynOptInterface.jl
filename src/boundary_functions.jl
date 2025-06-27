@@ -143,7 +143,7 @@ function Base.show(io::IO, mime::MIME"text/plain", integral::Integral)
 end
 
 """
-    MultiPhaseIntegral{DF}(terms::Vector{Integral{DF}}) where {DF<:AbstractDynamicFunction}
+    MultiPhaseIntegral{DF}(dyn_funs::Vector{DF}) where {DF<:AbstractDynamicFunction}
 
 Represent the sum of integrals
 ``\\sum_i \\big[ \\int_{t_0^{(i)}}^{t_f^{(i)}} d(\\dot{\\boldsymbol{y}}(t^{(i)}), \\boldsymbol{y}(t^{(i)}), t^{(i)}, x) \\mathrm{d}t^{(i)} \\big]``.
@@ -151,19 +151,19 @@ Represent the sum of integrals
 It is a subtype of [`AbstractBoundaryFunction`](@ref).
 """
 struct MultiPhaseIntegral{DF<:AbstractDynamicFunction} <: AbstractBoundaryFunction
-    terms::Vector{Integral{DF}}
+    dyn_funs::Vector{DF}
 end
 
 function Base.show(io::IO, mime::MIME"text/plain", multi_phase_integral::MultiPhaseIntegral)
 
-    output = "("
+    output = "(∫("
     io_buffer = IOBuffer()
-    show(io_buffer, mime, multi_phase_integral.terms[1])
-    output *= String(take!(io_buffer))
-    for term in multi_phase_integral.terms[2:end]
-        output *= " + "
-        show(io_buffer, mime, term)
-        output *= String(take!(io_buffer))
+    show(io_buffer, mime, multi_phase_integral.dyn_funs[1])
+    output *= String(take!(io_buffer)) * ")"
+    for dyn_fun in multi_phase_integral.dyn_funs[2:end]
+        output *= " + ∫("
+        show(io_buffer, mime, dyn_fun)
+        output *= String(take!(io_buffer)) * ")"
     end
     output *= ")"
     return print(io, output)
