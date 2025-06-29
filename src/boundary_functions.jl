@@ -175,7 +175,7 @@ end
         integral::IF,
     ) where {BF<:AbstractBoundaryFunction,IF<:Union{Integral,MultiPhaseIntegral}}
 
-Represent
+Represent the expression
 `` b(\\boldsymbol{y}(t_0), \\boldsymbol{y}(t_f), t_0, t_f, x) + \\sum_i \\big[ \\int_{t_0^{(i)}}^{t_f^{(i)}} d(\\dot{\\boldsymbol{y}}(t^{(i)}), \\boldsymbol{y}(t^{(i)}), t^{(i)}, x) \\mathrm{d}t^{(i)} \\big]``
 
 That is, the sum of an [`AbstractBoundaryFunction`](@ref) with either an [`Integral`](@ref) or a
