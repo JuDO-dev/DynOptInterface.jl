@@ -22,9 +22,9 @@ The default intervals for dynamic solutions are the same as the default interval
 """
 struct GeneralIntervals <: MOI.AbstractOptimizerAttribute end
 
-struct DefaultPoints <: MOI.AbstractOptimizerAttribute end
-struct DefaultMethod <: MOI.AbstractOptimizerAttribute end
-struct DefaultBounds <: MOI.AbstractOptimizerAttribute end
+struct GeneralPoints <: MOI.AbstractOptimizerAttribute end
+struct GeneralMethod <: MOI.AbstractOptimizerAttribute end
+struct GeneralBounds <: MOI.AbstractOptimizerAttribute end
 
 abstract type AbstractIntervals end
 abstract type AbstractPoints    end
@@ -78,6 +78,8 @@ end
 struct ExactBounds    <: AbstractBounds end
 struct BernsteinBounds <: AbstractBounds end
 
-function supports_setting(::MOI.ModelLike, ::MOI.AbstractOptimizerAttribute)
-    return false
+function supports_setting(optimizer::MOI.ModelLike, attr::MOI.AbstractOptimizerAttribute)
+    println("hhee")
+    MOI.supports(optimizer, attr)
+    return nothing
 end
