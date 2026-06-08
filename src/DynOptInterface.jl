@@ -13,4 +13,6 @@ include("nonlinear_support.jl")
 
 include("solutions.jl")
 
+include("Bridges/Bridges.jl")
+
 end

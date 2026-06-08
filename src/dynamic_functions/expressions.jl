@@ -35,14 +35,14 @@ struct LinearDynamicFunction{T} <: AbstractDynamicFunction
 end
 
 function Base.show(io::IO, mime::MIME"text/plain", linear_dyn_fun::LinearDynamicFunction)
-    
-    output = String(linear_dyn_fun.terms[1].coefficient) * " "
+
+    output = string(linear_dyn_fun.terms[1].coefficient) * " "
     io_buffer = IOBuffer()
     show(io_buffer, mime, linear_dyn_fun.terms[1].dyn_var)
     output *= String(take!(io_buffer))
 
     for term in linear_dyn_fun.terms[2:end]
-        output *= " + " * String(term.coefficient) * " "
+        output *= " + " * string(term.coefficient) * " "
         show(io_buffer, mime, term.dyn_var)
         output *= String(take!(io_buffer))
     end
@@ -108,7 +108,7 @@ end
 
 function Base.show(io::IO, mime::MIME"text/plain", quad_dyn_fun::PureQuadraticDynamicFunction)
 
-    output = String(quad_dyn_fun.terms[1].coefficient) * " "
+    output = string(quad_dyn_fun.terms[1].coefficient) * " "
     io_buffer = IOBuffer()
     show(io_buffer, mime, quad_dyn_fun.terms[1].dyn_var_1)
     output *= String(take!(io_buffer)) * " "
@@ -116,7 +116,7 @@ function Base.show(io::IO, mime::MIME"text/plain", quad_dyn_fun::PureQuadraticDy
     output *= String(take!(io_buffer))
 
     for term in quad_dyn_fun.terms[2:end]
-        output *= " + " * String(term.coefficient) * " "
+        output *= " + " * string(term.coefficient) * " "
         show(io_buffer, mime, term.dyn_var_1)
         output *= String(take!(io_buffer)) * " "
         show(io_buffer, mime, term.dyn_var_2)
