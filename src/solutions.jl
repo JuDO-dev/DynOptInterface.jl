@@ -3,15 +3,11 @@
 
 Supertype for solutions of dynamic functions.
 
-Concrete subtypes must implement the method [`AbstractDynamicSolution(::Real)`](@ref).
+Concrete subtypes must implement the callable interface `(s::AbstractDynamicSolution)(τ::Real)`,
+which evaluates the solution at `τ`.
 """
 abstract type AbstractDynamicSolution end
 
-"""
-    (::AbstractDynamicSolution)(τ::Real)
-
-Evaluates a dynamic solution at `τ`.
-"""
 function (::AbstractDynamicSolution)(::Real)
     return nothing
 end

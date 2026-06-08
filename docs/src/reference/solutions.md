@@ -6,5 +6,4 @@ CurrentModule = DynOptInterface
 
 ```@docs
 AbstractDynamicSolution
-(::AbstractDynamicSolution)(::Real)
 ```
