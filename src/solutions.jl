@@ -16,10 +16,6 @@ function (::AbstractDynamicSolution)(::Real)
     return nothing
 end
 
-"""
-    DefaultIntervals()
-The default intervals for dynamic solutions are the same as the default intervals for the model.
-"""
 struct GeneralIntervals <: MOI.AbstractOptimizerAttribute end
 
 struct GeneralPoints <: MOI.AbstractOptimizerAttribute end
