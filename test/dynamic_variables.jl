@@ -1,22 +1,34 @@
+struct DynVarlessModel <: MOI.ModelLike end
+
+struct DynVarNameModel <: MOI.ModelLike end
+MOI.supports(::DynVarNameModel, ::DOI.DynamicVariableName) = true
+
 @testset "Dynamic Variables" begin
-    
+
     t_1 = DOI.PhaseIndex(1)
     y_1 = DOI.DynamicVariableIndex(1, t_1)
     @test y_1.value == 1
+    @test y_1 isa DOI.AbstractDynamicFunction
     @test DOI.phase_index(y_1) == t_1
+    @test sprint(show, MIME"text/plain"(), y_1) == "DOI.DynamicVariableIndex(1)"
 
-    struct DynVarLessModel <: MOI.ModelLike end
-    model = DynVarLessModel()
-
-    @test DOI.supports_dynamic_variable(model) == false
-    @test_throws DOI.AddDynamicVariableNotAllowed DOI.add_dynamic_variable(model, t_1)
+    model = DynVarlessModel()
+    @test DOI.supports_dynamic_variables(model) == false
+    @test_throws DOI.AddDynamicVariableNotAllowedError DOI.add_dynamic_variable(model, t_1)
+    @test MOI.operation_name(DOI.AddDynamicVariableNotAllowedError("")) == "Adding a dynamic variable"
     @test MOI.is_valid(model, y_1) == false
-    @test_throws MOI.UnsupportedAttribute MOI.set(model, MOI.VariableName(), y_1, "State")
+    @test DOI.InvalidDynamicVariableError(y_1).dyn_var == y_1
+    @test DOI.UnsupportedDynamicVariablesError("") isa MOI.UnsupportedError
 
-    struct DynVarModel <: MOI.ModelLike end
-    MOI.supports(::DynVarModel, ::MOI.VariableName, ::Type{DOI.DynamicVariableIndex}) = true
-    model = DynVarModel()
+    for attr in (DOI.DynamicVariableName(), DOI.DynamicVariableStart(), DOI.DynamicVariableSolution())
+        @test attr isa DOI.AbstractDynamicVariableAttribute
+        @test MOI.supports(model, attr) == false
+    end
+    @test_throws ArgumentError MOI.set(model, DOI.DynamicVariableName(), y_1, "State")
+    @test_throws ArgumentError MOI.get(model, DOI.DynamicVariableName(), y_1)
 
-    @test_throws MOI.SetAttributeNotAllowed MOI.set(model, MOI.VariableName(), y_1, "State")
+    model = DynVarNameModel()
+    @test MOI.supports(model, DOI.DynamicVariableName()) == true
+    @test_throws ArgumentError MOI.set(model, DOI.DynamicVariableName(), y_1, "State")
 
 end

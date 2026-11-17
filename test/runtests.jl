@@ -2,5 +2,10 @@ import DynOptInterface as DOI
 import MathOptInterface as MOI
 using Test
 
-#include("phases.jl")
-#include("dynamic_variables.jl")
+@testset "DynOptInterface" begin
+    include("phases.jl")
+    include("dynamic_variables.jl")
+    include("functions.jl")
+    include("options.jl")
+    include("bridges.jl")
+end
