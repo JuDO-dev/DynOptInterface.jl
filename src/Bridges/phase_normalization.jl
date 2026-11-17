@@ -68,7 +68,7 @@ function MOI.Bridges.Constraint.concrete_bridge_type(
     ::Type{<:PhaseNormalizationBridge{T}},
     ::Type{DOI.Final{DOI.PhaseIndex}},
     ::Type{S},
-) where {T, S}
+) where {T, S<:MOI.AbstractScalarSet}
     return PhaseNormalizationBridge{T, S}
 end
 

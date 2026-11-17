@@ -126,6 +126,11 @@ function Base.show(io::IO, mime::MIME"text/plain", quad_dyn_fun::PureQuadraticDy
     return print(io, output)
 end
 
+function phase_index(quad_dyn_fun::PureQuadraticDynamicFunction)
+    return phase_index(quad_dyn_fun.terms[1].dyn_var_1)
+end
+
+
 ## Nonlinear
 
 """
